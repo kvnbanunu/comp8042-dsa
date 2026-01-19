@@ -4,7 +4,11 @@ import java.util.ArrayList;
 
 public class Section1 {
   public static void main(String[] args) {
-    // MethodTimer timer = new MethodTimer();
+    MethodTimer timer = new MethodTimer();
+
+    Algorithm q1 = new ThreeLoops("q1");
+
+    q1.run(timer, 40);
   }
 }
 
@@ -15,7 +19,6 @@ abstract class Algorithm {
     this.path = path + ".csv";
   }
 
-  // moved run from MethodTimer due to how Runnable works.
   public void run(MethodTimer timer, int n) {
     for (int i = 1; i <= n; i++) {
       int local = i;
@@ -35,8 +38,9 @@ abstract class Algorithm {
   public void operation(int n) {}
 }
 
-class Algo1 extends Algorithm {
-  public Algo1(String name) {
+// First algorithm for Section 1, I don't know what to call it
+class ThreeLoops extends Algorithm {
+  public ThreeLoops(String name) {
     super(name);
   }
 
@@ -45,6 +49,16 @@ class Algo1 extends Algorithm {
     int sum = 0;
     int a = 0;
     int b = 0;
+    for (int i = 0; i < n; i++) {
+      b += 2;
+      for (int j = 0; j < i * i; j++) {
+        a++;
+        sum += a;
+        for (int k = 0; k < j; k++) {
+          sum += a + b + 1;
+        }
+      }
+    }
   }
 }
 
@@ -67,10 +81,11 @@ class MethodTimer {
       for (BenchmarkResult result : results) {
         writer.write(result.inputSize + "," + result.duration + "\n");
       }
+      resetTimer();
     }
   }
 
-  public void resetTimer() {
+  private void resetTimer() {
     results.clear();
     // I addeed this to ensure the size(mem) actually resets to 0
     // in case not having to resize the arraylist when reusing the timer
