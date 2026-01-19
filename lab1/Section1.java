@@ -8,21 +8,49 @@ public class Section1 {
   }
 }
 
-// Changed code to be more reusable so this can be run for all tests
-class MethodTimer {
-  private final ArrayList<BenchmarkResult> results = new ArrayList<>();
+abstract class Algorithm {
+  public String path;
 
-  public void run(Runnable method, int n, String csvFile) {
+  public Algorithm(String path) {
+    this.path = path + ".csv";
+  }
+
+  // moved run from MethodTimer due to how Runnable works.
+  public void run(MethodTimer timer, int n) {
     for (int i = 1; i <= n; i++) {
-      timeMethod(method, i);
+      int local = i;
+      timer.timeMethod(
+          () -> {
+            operation(local);
+          },
+          i);
     }
     try {
-      writeResultsToCsv(csvFile);
-      resetTimer();
+      timer.writeResultsToCsv(path);
     } catch (IOException e) {
       e.printStackTrace();
     }
   }
+
+  public void operation(int n) {}
+}
+
+class Algo1 extends Algorithm {
+  public Algo1(String name) {
+    super(name);
+  }
+
+  @Override
+  public void operation(int n) {
+    int sum = 0;
+    int a = 0;
+    int b = 0;
+  }
+}
+
+// Changed code to be more reusable so this can be run for all tests
+class MethodTimer {
+  private final ArrayList<BenchmarkResult> results = new ArrayList<>();
 
   public void timeMethod(Runnable method, int inputSize) {
     long startTime = System.nanoTime();
