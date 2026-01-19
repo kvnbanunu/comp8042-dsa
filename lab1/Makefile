@@ -1,5 +1,5 @@
-all:
-	java Section.java
+all: clean
+	java Section1.java
 
 clean:
 	rm *.csv

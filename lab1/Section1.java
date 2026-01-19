@@ -1,18 +1,22 @@
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Section1 {
   public static void main(String[] args) {
-    MethodTimer timer = new MethodTimer();
+    int n = 40;
+    MethodTimer timer = new MethodTimer(n);
 
-    int n = 10;
-    // factorial won't work for anything greater due to integer overflow
+    int[] arr = new int[n];
+    for (int i = 0; i < n; i++) {
+      arr[i] = i;
+    }
 
     Algorithm q1 = new ThreeLoops("q1");
     Algorithm q2 = new Factorial("q2");
-    Algorithm q3 = new BinarySearch("q3");
+    Algorithm q3 = new BinarySearch("q3", arr);
 
     q1.run(timer, n);
     q2.run(timer, n);
@@ -80,35 +84,36 @@ class Factorial extends Algorithm {
 
   @Override
   public void operation(int n) {
-    int result = helper(n);
+    if (n == 0) {
+      return;
+    }
+    BigInteger result = helper(BigInteger.valueOf(n));
 
     // Test output
     // System.out.println("q2: n: " + n + " ans: " + result);
   }
 
-  private int helper(int n) {
-    if (n == 1) {
-      return 1;
+  private BigInteger helper(BigInteger n) {
+    if (n.equals(BigInteger.ONE)) {
+      return BigInteger.ONE;
     } else {
-      return n * helper(n - 1);
+      return helper(n.subtract(BigInteger.ONE)).multiply(n);
     }
   }
 }
 
 class BinarySearch extends Algorithm {
-  public BinarySearch(String name) {
+  int[] arr;
+
+  public BinarySearch(String name, int[] arr) {
     super(name);
+    this.arr = arr;
   }
 
   @Override
   public void operation(int n) {
     if (n < 0) {
       return;
-    }
-
-    int[] arr = new int[n];
-    for (int i = 0; i < n; i++) {
-      arr[i] = i;
     }
 
     // gen random int between 0 - n
@@ -141,9 +146,22 @@ class BinarySearch extends Algorithm {
   }
 }
 
+class QuinternarySearch extends Algorithm {
+  QuinternarySearch(String name) {
+    super(name);
+  }
+
+  @Override
+  public void operation(int n) {}
+}
+
 // Changed code to be more reusable so this can be run for all tests
 class MethodTimer {
-  private final ArrayList<BenchmarkResult> results = new ArrayList<>();
+  private ArrayList<BenchmarkResult> results;
+
+  MethodTimer(int size) {
+    results = new ArrayList<>(size);
+  }
 
   public void timeMethod(Runnable method, int inputSize) {
     long startTime = System.nanoTime();
@@ -166,10 +184,6 @@ class MethodTimer {
 
   private void resetTimer() {
     results.clear();
-    // I addeed this to ensure the size(mem) actually resets to 0
-    // in case not having to resize the arraylist when reusing the timer
-    // affects the total runtime
-    results.trimToSize();
   }
 
   private static class BenchmarkResult {
