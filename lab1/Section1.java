@@ -1,14 +1,22 @@
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Section1 {
   public static void main(String[] args) {
     MethodTimer timer = new MethodTimer();
 
-    Algorithm q1 = new ThreeLoops("q1");
+    int n = 10;
+    // factorial won't work for anything greater due to integer overflow
 
-    q1.run(timer, 40);
+    Algorithm q1 = new ThreeLoops("q1");
+    Algorithm q2 = new Factorial("q2");
+    Algorithm q3 = new BinarySearch("q3");
+
+    q1.run(timer, n);
+    q2.run(timer, n);
+    q3.run(timer, n);
   }
 }
 
@@ -59,6 +67,77 @@ class ThreeLoops extends Algorithm {
         }
       }
     }
+
+    // Test output
+    // System.out.println("q1 n: " + n + " sum: " + sum);
+  }
+}
+
+class Factorial extends Algorithm {
+  public Factorial(String name) {
+    super(name);
+  }
+
+  @Override
+  public void operation(int n) {
+    int result = helper(n);
+
+    // Test output
+    // System.out.println("q2: n: " + n + " ans: " + result);
+  }
+
+  private int helper(int n) {
+    if (n == 1) {
+      return 1;
+    } else {
+      return n * helper(n - 1);
+    }
+  }
+}
+
+class BinarySearch extends Algorithm {
+  public BinarySearch(String name) {
+    super(name);
+  }
+
+  @Override
+  public void operation(int n) {
+    if (n < 0) {
+      return;
+    }
+
+    int[] arr = new int[n];
+    for (int i = 0; i < n; i++) {
+      arr[i] = i;
+    }
+
+    // gen random int between 0 - n
+    int rand = (int) (Math.random() * (n + 1));
+
+    boolean result = helper(arr, rand);
+
+    // Test output
+    // System.out.println("q3: n: " + n + " arr: " + arr + " ans: " + result);
+  }
+
+  private boolean helper(int[] arr, int item) {
+    int len = arr.length;
+
+    if (len == 0) {
+      return false;
+    }
+
+    int mid = len / 2;
+
+    if (item == arr[mid]) {
+      return true;
+    }
+    if (item > arr[mid]) {
+      int[] upper = Arrays.copyOfRange(arr, mid + 1, len);
+      return helper(upper, item);
+    }
+    int[] lower = Arrays.copyOfRange(arr, 0, mid);
+    return helper(lower, item);
   }
 }
 
