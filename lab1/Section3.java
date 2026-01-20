@@ -1,12 +1,36 @@
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 public class Section3 {
 
   public static void main(String[] args) {
-    Drawer drawer = new Drawer(12);
-    drawer.Print();
+    int start = 12; // hard set minimum
+    int end = 40;
+    int len = end - start + 1;
+    int[] tests = new int[len];
+
+    for (int i = 0; i < len; i++) {
+      Drawer drawer = new Drawer(i + start);
+      tests[i] = drawer.drawTillMatch();
+      System.out.println("Tries (n=" + (i + start) + "): " + tests[i]);
+    }
+
+    double sum = 0;
+    int min = end;
+    int max = 0;
+    for (int t : tests) {
+      sum += t;
+      min = Math.min(min, t);
+      max = Math.max(max, t);
+    }
+
+    double avg = sum / (double) len;
+    System.out.println("Worst: " + max);
+    System.out.println("Best: " + min);
+    System.out.println("Average: " + avg);
   }
 }
 
@@ -35,11 +59,36 @@ class Drawer {
       arr[i] = "purple";
     }
 
-    ribbons = Arrays.asList(arr);
+    ribbons = new ArrayList<>(Arrays.asList(arr));
     Collections.shuffle(ribbons);
   }
 
-  public void drawTillMatch() {}
+  public int drawTillMatch() {
+    int tries = 0;
+    HashMap<String, Boolean> seen = new HashMap<>();
+    seen.put("pink", false);
+    seen.put("blue", false);
+    seen.put("purple", false);
+
+    while (true) {
+      tries++;
+      String ribbon = draw();
+      if (seen.get(ribbon)) { // if we already have a matching ribbon
+        return tries;
+      }
+      seen.replace(ribbon, true);
+    }
+  }
+
+  // draws a ribbon and removes it from the drawer
+  private String draw() {
+    int len = ribbons.size();
+    int rand = (int) (Math.random() * len);
+
+    String res = ribbons.get(rand);
+    ribbons.remove(rand);
+    return res;
+  }
 
   public void Print() {
     System.out.println(ribbons.toString());
