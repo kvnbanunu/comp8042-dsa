@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class Section1 {
+public class Section2 {
   public static void main(String[] args) {
     int n = 40;
     MethodTimer timer = new MethodTimer(n);
