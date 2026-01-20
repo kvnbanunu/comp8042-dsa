@@ -2,4 +2,4 @@ all: clean
 	java Section1.java
 
 clean:
-	rm *.csv
+	rm -f *.csv

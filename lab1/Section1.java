@@ -17,10 +17,12 @@ public class Section1 {
     Algorithm q1 = new ThreeLoops("q1");
     Algorithm q2 = new Factorial("q2");
     Algorithm q3 = new BinarySearch("q3", arr);
+    Algorithm q4 = new QuinternarySearch("q4", arr);
 
     q1.run(timer, n);
     q2.run(timer, n);
     q3.run(timer, n);
+    q4.run(timer, n);
   }
 }
 
@@ -119,7 +121,10 @@ class BinarySearch extends Algorithm {
     // gen random int between 0 - n
     int rand = (int) (Math.random() * (n + 1));
 
-    boolean result = helper(arr, rand);
+    // cut down the array to match n length
+    int[] local = Arrays.copyOfRange(arr, 0, n);
+
+    boolean result = helper(local, rand);
 
     // Test output
     // System.out.println("q3: n: " + n + " arr: " + arr + " ans: " + result);
@@ -147,12 +152,53 @@ class BinarySearch extends Algorithm {
 }
 
 class QuinternarySearch extends Algorithm {
-  QuinternarySearch(String name) {
+  int[] arr;
+
+  QuinternarySearch(String name, int[] arr) {
     super(name);
+    this.arr = arr;
   }
 
   @Override
-  public void operation(int n) {}
+  public void operation(int n) {
+    int[] local = Arrays.copyOfRange(arr, 0, n);
+    boolean result = helper(local, n);
+  }
+
+  private boolean helper(int[] arr, int item) {
+    int len = arr.length;
+
+    if (len == 0) {
+      return false;
+    }
+
+    // base case will be if len is < 5
+    if (len < 5) {
+      for (int i = 0; i < len; i++) {
+        if (arr[i] == item) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    int step = len / 5;
+
+    for (int i = 0; i < 5; i++) {
+      int end;
+      if (i == 4) { // last index
+        end = len;
+      } else {
+        end = i * step;
+      }
+      int[] local = Arrays.copyOfRange(arr, i, end);
+      if (helper(local, item)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
 }
 
 // Changed code to be more reusable so this can be run for all tests
