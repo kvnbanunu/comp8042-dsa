@@ -1,30 +1,59 @@
 class PermutationGenerator {
   private int size;
-  private int[] inputList;
-  private int[] interList;
+  private Integer[] inputList;
+  private Integer[] interList;
 
   public PermutationGenerator(int n) {
     this.size = n;
-    this.inputList = new int[n];
-    this.interList = new int[n];
+    this.inputList = new Integer[n];
+    this.interList = new Integer[n];
 
     for (int i = 0; i < n; i++) {
       this.inputList[i] = i;
     }
   }
 
-  public PermutationGenerator(int[] inputList) {
+  public PermutationGenerator(Integer[] inputList) {
     this.inputList = inputList;
-    this.interList = new int[inputList.length];
+    this.interList = new Integer[inputList.length];
     this.size = inputList.length;
   }
 
-  public int[] smallestLargerNumbers() {
-    return new int[0];
+  public Integer[] smallestLargerNumbers() {
+    // out of bound values to track largest/smallest seen
+    int smallestSeen = this.size;
+    int largestSeen = -1;
+    int smallestExisting = 0;
+    int largestExisting = this.size - 1;
+    Integer[] li = this.inputList; // reference
+
+    // inverse arr [value] = index
+    Integer[] inv = new Integer[this.size];
+
+    // fill inverse array O(n)
+    for (int i = 0; i < this.size; i++) {
+      inv[li[i]] = i;
+    }
+
+    // last one is always null
+    this.interList[this.size - 1] = null;
+
+    // iterate up until last index
+    for (int i = 0; i < this.size - 1; i++) {
+      int curr = li[i];
+      if (curr < largestExisting && curr > largestSeen) {
+        largestSeen = curr;
+        if (curr < smallestSeen) smallestSeen = curr;
+        curr++;
+        if (inv[curr] > i) {}
+      }
+    }
+
+    return this.interList;
   }
 
-  public int[] largestSmallerNumbers() {
-    return new int[0];
+  public Integer[] largestSmallerNumbers() {
+    return new Integer[0];
   }
 
   public void shuffle() {
@@ -37,6 +66,10 @@ class PermutationGenerator {
       this.interList[rand] = temp;
     }
     this.inputList = this.interList.clone();
+  }
+
+  public Integer[] getInputList() {
+    return this.inputList;
   }
 
   public void printInputList() {
@@ -62,18 +95,13 @@ class PermutationGenerator {
 
 public class ListSection {
   public static void main(String[] args) {
-    PermutationGenerator gen = new PermutationGenerator(10);
+    Integer[] arrTest = {8, 1, 2, 0, 7, 4, 3, 9, 5, 6};
+    PermutationGenerator gen = new PermutationGenerator(arrTest);
     gen.printInputList();
-    gen.shuffle();
-    gen.printInputList();
-    gen.shuffle();
-    gen.printInputList();
-    gen.shuffle();
-    gen.printInputList();
-    gen.shuffle();
-    gen.printInputList();
-    gen.shuffle();
-    gen.printInputList();
-    gen.shuffle();
+    // PermutationGenerator gen = new PermutationGenerator(10);
+    // gen.printInputList();
+    // gen.printInterList();
+    // gen.shuffle();
+    // gen.printInterList();
   }
 }
