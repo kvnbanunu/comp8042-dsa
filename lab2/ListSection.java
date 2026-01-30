@@ -20,36 +20,55 @@ class PermutationGenerator {
   }
 
   public Integer[] smallestLargerNumbers() {
+    int n = this.size;
     // out of bound values to track largest/smallest seen
-    int smallestSeen = this.size;
+    int smallestSeen = n;
     int largestSeen = -1;
     int smallestExisting = 0;
-    int largestExisting = this.size - 1;
-    Integer[] li = this.inputList; // reference
+    int largestExisting = n - 1;
+    Integer[] li = this.inputList; // reference to input list
+    Integer[] res = this.interList; // inter / output list
 
     // inverse arr [value] = index
-    Integer[] inv = new Integer[this.size];
+    Integer[] inv = new Integer[n];
 
     // fill inverse array O(n)
-    for (int i = 0; i < this.size; i++) {
+    for (int i = 0; i < n; i++) {
       inv[li[i]] = i;
     }
 
     // last one is always null
-    this.interList[this.size - 1] = null;
+    res[n - 1] = null;
 
-    // iterate up until last index
-    for (int i = 0; i < this.size - 1; i++) {
+    // iterate up until second last index
+    for (int i = 0; i < n - 1; i++) {
       int curr = li[i];
-      if (curr < largestExisting && curr > largestSeen) {
-        largestSeen = curr;
-        if (curr < smallestSeen) smallestSeen = curr;
-        curr++;
-        if (inv[curr] > i) {}
+      largestSeen = Math.max(largestSeen, curr);
+      smallestSeen = Math.min(smallestSeen, curr);
+
+      if (curr == smallestExisting) {
+        // find next smallest that exists after this number
+        while (inv[smallestExisting] <= i) {
+          smallestExisting++;
+        }
+        res[i] = smallestExisting;
+      } else if (curr == largestExisting) {
+        // find next largest that exists after this number
+        while (inv[largestExisting] <= i) {
+          largestExisting--;
+        }
+        res[i] = null;
+      } else {
+        // start at smallestExisting if greater than current
+        curr = Math.max(curr + 1, smallestExisting);
+
+        while (inv[curr] <= i) {
+          curr++;
+        }
+        res[i] = curr;
       }
     }
-
-    return this.interList;
+    return res;
   }
 
   public Integer[] largestSmallerNumbers() {
@@ -91,6 +110,16 @@ class PermutationGenerator {
     list += "]";
     System.out.println(list);
   }
+
+  public void printOutputList(Integer[] li) {
+    String list = "Output List: [";
+    list += li[0];
+    for (int i = 1; i < li.length; i++) {
+      list += "," + li[i];
+    }
+    list += "]";
+    System.out.println(list);
+  }
 }
 
 public class ListSection {
@@ -98,6 +127,8 @@ public class ListSection {
     Integer[] arrTest = {8, 1, 2, 0, 7, 4, 3, 9, 5, 6};
     PermutationGenerator gen = new PermutationGenerator(arrTest);
     gen.printInputList();
+    Integer[] output = gen.smallestLargerNumbers();
+    gen.printOutputList(output);
     // PermutationGenerator gen = new PermutationGenerator(10);
     // gen.printInputList();
     // gen.printInterList();
