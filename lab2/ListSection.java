@@ -22,9 +22,6 @@ class PermutationGenerator {
 
   public Integer[] smallestLargerNumbers() {
     int n = this.size;
-    // out of bound values to track largest/smallest seen
-    int smallestSeen = n;
-    int largestSeen = -1;
     int smallestExisting = 0;
     int largestExisting = n - 1;
     Integer[] li = this.inputList; // reference to input list
@@ -44,8 +41,6 @@ class PermutationGenerator {
     // iterate up until second last index
     for (int i = 0; i < n - 1; i++) {
       int curr = li[i];
-      largestSeen = Math.max(largestSeen, curr);
-      smallestSeen = Math.min(smallestSeen, curr);
 
       if (curr == smallestExisting) {
         // find next smallest that exists after this number
@@ -76,9 +71,6 @@ class PermutationGenerator {
 
   public Integer[] largestSmallerNumbers() {
     int n = this.size;
-    // out of bound values to track largest/smallest seen
-    int smallestSeen = n;
-    int largestSeen = -1;
     int smallestExisting = 0;
     int largestExisting = n - 1;
     Integer[] li = this.inputList; // reference to input list
@@ -97,9 +89,6 @@ class PermutationGenerator {
 
     for (int i = 0; i < n - 1; i++) {
       int curr = li[i];
-      largestSeen = Math.max(largestSeen, curr);
-      smallestSeen = Math.min(smallestSeen, curr);
-
       // do the same as smallestLarger, except flip results
       if (curr == smallestExisting) {
         while (inv[smallestExisting] <= i) {
