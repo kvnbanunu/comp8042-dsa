@@ -1,3 +1,10 @@
+/*
+ * BCIT COMP 8042
+ * Lab Assignment 2
+ * List Section
+ * Kevin Nguyen
+ * A00955925
+ */
 public class PermutationGenerator {
   private int size;
   private Integer[] inputList;
@@ -19,8 +26,10 @@ public class PermutationGenerator {
     }
   }
 
-  // Sets inputList to the passed in list
-  // and interList to an array of the same size with null values.
+  /*
+   * Sets inputList to the passed in list
+   * and interList to an array of the same size with null values.
+   */
   public PermutationGenerator(Integer[] inputList) {
     this.inputList = inputList;
     this.interList = new Integer[inputList.length];
