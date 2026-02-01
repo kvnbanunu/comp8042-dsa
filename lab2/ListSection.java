@@ -3,6 +3,9 @@ class PermutationGenerator {
   private Integer[] inputList;
   private Integer[] interList;
 
+  // Initialize input and inter list to an array of size n
+  // inputList is then filled with values 0..n-1
+  // interList is filled with null values
   public PermutationGenerator(int n) {
     this.size = n;
     this.inputList = new Integer[n];
@@ -14,12 +17,19 @@ class PermutationGenerator {
     }
   }
 
+  // Sets inputList to the passed in list
+  // and interList to an array of the same size with null values.
   public PermutationGenerator(Integer[] inputList) {
     this.inputList = inputList;
     this.interList = new Integer[inputList.length];
     this.size = inputList.length;
   }
 
+  /**
+   * returns an array of size n where each index i contains the smallest number that is larger than
+   * inputList[i] that is stored in the index past i within the input array, otherwise null.
+   * inputList is left unchanged, while interList contains the output and also returned.
+   */
   public Integer[] smallestLargerNumbers() {
     int n = this.size;
     int smallestExisting = 0;
@@ -56,9 +66,6 @@ class PermutationGenerator {
         // since largestExisting, nothing on the right side is larger => null
         res[i] = null;
       } else {
-        // start at smallestExisting if greater than current + 1
-        curr = Math.max(curr + 1, smallestExisting);
-
         // increment curr until it resides on the right side
         while (inv[curr] <= i) {
           curr++;
@@ -69,6 +76,11 @@ class PermutationGenerator {
     return res;
   }
 
+  /**
+   * returns an array of size n where each index i contains the largest number that is smaller than
+   * inputList[i] that is stored in the index past i within the input array, otherwise null.
+   * inputList is left unchanged, while interList contains the output and also returned.
+   */
   public Integer[] largestSmallerNumbers() {
     int n = this.size;
     int smallestExisting = 0;
@@ -89,6 +101,7 @@ class PermutationGenerator {
 
     for (int i = 0; i < n - 1; i++) {
       int curr = li[i];
+
       // do the same as smallestLarger, except flip results
       if (curr == smallestExisting) {
         while (inv[smallestExisting] <= i) {
@@ -101,8 +114,6 @@ class PermutationGenerator {
         }
         res[i] = largestExisting;
       } else {
-        curr = Math.min(curr - 1, largestExisting);
-
         while (inv[curr] <= i) {
           curr--;
         }
@@ -112,6 +123,8 @@ class PermutationGenerator {
     return res;
   }
 
+  // shuffles the input array by randomly swapping values storing the final result in interList.
+  // Both inputList and interList are mutated.
   public void shuffle() {
     this.interList = this.inputList.clone();
     for (int i = 0; i < this.size; i++) {
@@ -124,38 +137,37 @@ class PermutationGenerator {
     this.inputList = this.interList.clone();
   }
 
+  // ---------- The following methods are used for testing
+
   public Integer[] getInputList() {
     return this.inputList;
   }
 
-  public void printInputList() {
-    String list = "Input List: [";
-    list += this.inputList[0];
-    for (int i = 1; i < this.size; i++) {
-      list += "," + this.inputList[i];
-    }
-    list += "]";
-    System.out.println(list);
+  public Integer[] getInterList() {
+    return this.interList;
   }
 
-  public void printInterList() {
-    String list = "Inter List: [";
-    list += this.interList[0];
-    for (int i = 1; i < this.size; i++) {
-      list += "," + this.interList[i];
-    }
-    list += "]";
-    System.out.println(list);
-  }
+  public void printList(String title, Integer[] li) {
+    String list = title + ": [";
 
-  public void printOutputList(Integer[] li) {
-    String list = "Output List: [";
     list += li[0];
     for (int i = 1; i < li.length; i++) {
       list += "," + li[i];
     }
     list += "]";
     System.out.println(list);
+  }
+
+  public void printInputList() {
+    printList("Input", this.inputList);
+  }
+
+  public void printInterList() {
+    printList("Inter", this.interList);
+  }
+
+  public void printOutputList(Integer[] li) {
+    printList("Output", li);
   }
 }
 
