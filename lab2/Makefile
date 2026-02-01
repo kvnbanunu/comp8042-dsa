@@ -1,0 +1,2 @@
+list:
+	@java PermutationGenerator.java
