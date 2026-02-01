@@ -3,9 +3,11 @@ class PermutationGenerator {
   private Integer[] inputList;
   private Integer[] interList;
 
-  // Initialize input and inter list to an array of size n
-  // inputList is then filled with values 0..n-1
-  // interList is filled with null values
+  /*
+   * Initialize input and inter list to an array of size n
+   * inputList is then filled with values
+   * 0..n-1 interList is filled with null values
+   */
   public PermutationGenerator(int n) {
     this.size = n;
     this.inputList = new Integer[n];
@@ -25,60 +27,56 @@ class PermutationGenerator {
     this.size = inputList.length;
   }
 
-  /**
-   * returns an array of size n where each index i contains the smallest number that is larger than
-   * inputList[i] that is stored in the index past i within the input array, otherwise null.
+  /*
+   * returns an array of size n where each index i contains the smallest number
+   * that is larger than inputList[i] that is stored in the index past i within
+   * the input array, otherwise null.
    * inputList is left unchanged, while interList contains the output and also returned.
    */
   public Integer[] smallestLargerNumbers() {
     int n = this.size;
-    int smallestExisting = 0;
-    int largestExisting = n - 1;
-    Integer[] li = this.inputList; // reference to input list
-    Integer[] res = this.interList; // inter / output list
+    Integer[] li = this.inputList;
+    Integer[] res = this.interList;
+    Integer[] next = new Integer[n];
+    int[] inv = new int[n];
 
-    // inverse arr [value] = index
-    Integer[] inv = new Integer[n];
-
-    // fill inverse array O(n)
+    // fill inverse arr [value] = index
     for (int i = 0; i < n; i++) {
       inv[li[i]] = i;
+    }
+
+    // init next array (each val replaced with it's increment)
+    // last value stays null
+    for (int i = 0; i < n - 1; i++) {
+      next[i] = i + 1;
     }
 
     // last one is always null
     res[n - 1] = null;
 
-    // iterate up until second last index
+    // iterate until second last index
     for (int i = 0; i < n - 1; i++) {
-      int curr = li[i];
+      Integer curr = li[i];
+      // jump to the next value until it occurs after i or out of bounds
+      while (curr != null && inv[curr] <= i) {
+        curr = next[curr];
+      }
 
-      if (curr == smallestExisting) {
-        // find next smallest that exists after this number
-        while (inv[smallestExisting] <= i) {
-          smallestExisting++;
-        }
-        res[i] = smallestExisting;
-      } else if (curr == largestExisting) {
-        // find next largest that exists after this number
-        while (inv[largestExisting] <= i) {
-          largestExisting--;
-        }
-        // since largestExisting, nothing on the right side is larger => null
-        res[i] = null;
-      } else {
-        // increment curr until it resides on the right side
-        while (inv[curr] <= i) {
-          curr++;
-        }
-        res[i] = curr;
+      res[i] = curr;
+
+      // path to next check is compressed
+      if (li[i] > 0) { // cannot access ind -1
+        next[li[i] - 1] = curr;
       }
     }
+
     return res;
   }
 
-  /**
-   * returns an array of size n where each index i contains the largest number that is smaller than
-   * inputList[i] that is stored in the index past i within the input array, otherwise null.
+  /*
+   * returns an array of size n where each index i contains the largest number
+   * that is smaller than inputList[i] that is stored in the index past i within
+   * the input array, otherwise null.
    * inputList is left unchanged, while interList contains the output and also returned.
    */
   public Integer[] largestSmallerNumbers() {
@@ -123,8 +121,11 @@ class PermutationGenerator {
     return res;
   }
 
-  // shuffles the input array by randomly swapping values storing the final result in interList.
-  // Both inputList and interList are mutated.
+  /*
+   * shuffles the input array by randomly swapping values storing the final
+   * result in interList.
+   * Both inputList and interList are mutated.
+   */
   public void shuffle() {
     this.interList = this.inputList.clone();
     for (int i = 0; i < this.size; i++) {
@@ -173,14 +174,25 @@ class PermutationGenerator {
 
 public class ListSection {
   public static void main(String[] args) {
-    // Integer[] arrTest = {8, 1, 2, 0, 7, 4, 3, 9, 5, 6};
-    Integer[] arrTest = {1, 0, 6, 4, 2, 3, 5}; // lab example
-    PermutationGenerator gen = new PermutationGenerator(arrTest);
+    Integer[] labExample = {1, 0, 6, 4, 2, 3, 5}; // lab example
+    PermutationGenerator gen = new PermutationGenerator(labExample);
     gen.printInputList();
-    Integer[] small = gen.smallestLargerNumbers();
-    gen.printOutputList(small); // [2,2,null,5,3,5,null]
-    Integer[] large = gen.largestSmallerNumbers();
-    gen.printOutputList(large); // [0,null,5,3,null,null,null]
+    gen.printOutputList(gen.smallestLargerNumbers()); // [2,2,null,5,3,5,null]
+
+    Integer[] strictDesc = {9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
+    gen = new PermutationGenerator(strictDesc);
+    gen.printInputList();
+    gen.printOutputList(gen.smallestLargerNumbers());
+    // [null,null,null,null,null,null,null,null,null,null]
+
+    Integer[] worstCase = {8, 7, 6, 5, 4, 3, 2, 1, 0, 9};
+    gen = new PermutationGenerator(worstCase);
+    gen.printInputList();
+    gen.printOutputList(gen.smallestLargerNumbers());
+
+    // Integer[] large = gen.largestSmallerNumbers();
+    // gen.printOutputList(large); // [0,null,5,3,null,null,null]
+
     // PermutationGenerator gen = new PermutationGenerator(10);
     // gen.printInputList();
     // gen.printInterList();
