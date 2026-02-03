@@ -3,3 +3,6 @@ list:
 
 stack:
 	@java ArrayListStack.java
+
+queue:
+	@java QuickMarker.java
