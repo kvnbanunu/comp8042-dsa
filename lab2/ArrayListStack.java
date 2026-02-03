@@ -28,18 +28,8 @@ interface Stack<T> {
 }
 
 public class ArrayListStack<T> implements Stack<T> {
-  private ArrayList<T> list;
-  private int length;
-
-  public ArrayListStack() {
-    list = new ArrayList<T>();
-    length = 0;
-  }
-
-  public ArrayListStack(int n) {
-    list = new ArrayList<>(n);
-    length = n;
-  }
+  private ArrayList<T> list = new ArrayList<>();
+  private int length = 0;
 
   @Override
   public boolean empty() {
@@ -73,9 +63,9 @@ public class ArrayListStack<T> implements Stack<T> {
   record Parenthesis(char p, int line) {}
 
   public static void validParentheses(String fileName) {
+    ArrayListStack<Parenthesis> stack = new ArrayListStack<>();
     File file = new File(fileName);
     boolean res = true;
-    ArrayListStack<Parenthesis> stack = new ArrayListStack<>();
     int currentLine = 0;
 
     try (Scanner scan = new Scanner(file)) {
