@@ -13,3 +13,15 @@ or
 ```
 java PermutationGenerator.java
 ```
+
+## Stack Section
+
+```sh
+make stack
+```
+
+or
+
+```
+java ArrayListStack.java
+```
