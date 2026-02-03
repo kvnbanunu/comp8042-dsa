@@ -11,7 +11,7 @@ public class QuickMarker {
     // 1. a=12 n=3
     QuickMarker qm = new QuickMarker(12, 3);
     Applicant[] applicants = qm.getMarking();
-    System.out.println("Case 1: a = 12, n = 3");
+    System.out.println("\nCase 1: a = 12, n = 3");
     for (Applicant a : applicants) {
       System.out.println(a);
     }
@@ -19,13 +19,13 @@ public class QuickMarker {
     // 2. a=180 n=37 get 50% Applicant
     qm = new QuickMarker(180, 37);
     applicants = qm.getMarking();
-    System.out.println("Case 2: a = 180, n = 37");
+    System.out.println("\nCase 2: a = 180, n = 37");
     System.out.println("Applicant with 50%: " + qm.getApplicantWithMark(50.0F).applicantNumber);
 
     // 3. a=1100 n=259 get 100% Applicant
     qm = new QuickMarker(1100, 259);
     applicants = qm.getMarking();
-    System.out.println("Case 3: a = 1100, n = 259");
+    System.out.println("\nCase 3: a = 1100, n = 259");
     System.out.println("Applicant with 100%: " + qm.getApplicantWithMark(100.0F).applicantNumber);
   }
 
@@ -43,7 +43,31 @@ public class QuickMarker {
     }
   }
 
-  private void runMarking() {}
+  private void runMarking() {
+    int marksGiven = 0;
+    for (int i = 0; i < numberApplicants; i++) {
+      if (i + 1 % skip == 0) {
+        marksGiven++;
+        float mark = (float) (marksGiven) / (float) (numberApplicants) * 100;
+        applicants[i].setMark(mark);
+      } else {
+        queue.offer(applicants[i]);
+      }
+    }
+
+    int seen = 0;
+    while (numberApplicants - marksGiven > 0) {
+      seen++;
+      if (seen % skip == 0) {
+        marksGiven++;
+        Applicant curr = queue.poll();
+        float mark = (float) (marksGiven) / (float) (numberApplicants) * 100;
+        applicants[curr.applicantNumber].setMark(mark);
+      } else {
+        queue.offer(queue.poll());
+      }
+    }
+  }
 
   public Applicant[] getMarking() {
     runMarking();
