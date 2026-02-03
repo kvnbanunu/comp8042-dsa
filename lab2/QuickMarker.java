@@ -8,11 +8,25 @@ public class QuickMarker {
   private int skip;
 
   public static void main(String[] args) {
-    QuickMarker qm = new QuickMarker(10, 3);
+    // 1. a=12 n=3
+    QuickMarker qm = new QuickMarker(12, 3);
     Applicant[] applicants = qm.getMarking();
+    System.out.println("Case 1: a = 12, n = 3");
     for (Applicant a : applicants) {
       System.out.println(a);
     }
+
+    // 2. a=180 n=37 get 50% Applicant
+    qm = new QuickMarker(180, 37);
+    applicants = qm.getMarking();
+    System.out.println("Case 2: a = 180, n = 37");
+    System.out.println("Applicant with 50%: " + qm.getApplicantWithMark(50.0F).applicantNumber);
+
+    // 3. a=1100 n=259 get 100% Applicant
+    qm = new QuickMarker(1100, 259);
+    applicants = qm.getMarking();
+    System.out.println("Case 3: a = 1100, n = 259");
+    System.out.println("Applicant with 100%: " + qm.getApplicantWithMark(100.0F).applicantNumber);
   }
 
   public QuickMarker(int numberApplicants, int skip) {
@@ -29,27 +43,20 @@ public class QuickMarker {
     }
   }
 
-  private void runMarking() {
-    // We can use our 'circular queue' concept to implement this algorithm
-
-    // We want to iteratively count the applicants through 'skip' steps
-
-    // We do this by removing an applicant from the front of the queue and
-    // putting them to the back
-
-    // Once we've hit the 'skip' steps, we remove the applicant from the queue
-    // and assign them their mark
-
-    // We repeat this until there are no more applicants left in the queue
-
-    // To visualize this, think of yourself stay fixed in one position and
-    // rotating the queue around you 'skip' times. Then remove whoever is in
-    // front of you and repeat.
-  }
+  private void runMarking() {}
 
   public Applicant[] getMarking() {
     runMarking();
     return applicants;
+  }
+
+  public Applicant getApplicantWithMark(float mark) {
+    for (Applicant a : applicants) {
+      if (a.mark == mark) {
+        return a;
+      }
+    }
+    return null;
   }
 }
 
