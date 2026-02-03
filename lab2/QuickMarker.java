@@ -1,3 +1,10 @@
+/*
+ * BCIT COMP 8042
+ * Lab Assignment 2
+ * Queue Section
+ * Kevin Nguyen
+ * A00955925
+ */
 import java.util.LinkedList;
 import java.util.Queue;
 
