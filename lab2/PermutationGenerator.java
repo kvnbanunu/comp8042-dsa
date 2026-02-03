@@ -16,13 +16,13 @@ public class PermutationGenerator {
    * 0..n-1 interList is filled with null values
    */
   public PermutationGenerator(int n) {
-    this.size = n;
-    this.inputList = new Integer[n];
-    this.interList = new Integer[n];
+    size = n;
+    inputList = new Integer[n];
+    interList = new Integer[n];
 
     // fill arr 0..n-1
     for (int i = 0; i < n; i++) {
-      this.inputList[i] = i;
+      inputList[i] = i;
     }
   }
 
@@ -30,10 +30,10 @@ public class PermutationGenerator {
    * Sets inputList to the passed in list
    * and interList to an array of the same size with null values.
    */
-  public PermutationGenerator(Integer[] inputList) {
-    this.inputList = inputList;
-    this.interList = new Integer[inputList.length];
-    this.size = inputList.length;
+  public PermutationGenerator(Integer[] li) {
+    inputList = li;
+    size = li.length;
+    interList = new Integer[size];
   }
 
   /*
@@ -43,9 +43,9 @@ public class PermutationGenerator {
    * inputList is left unchanged, while interList contains the output and also returned.
    */
   public Integer[] smallestLargerNumbers() {
-    int n = this.size;
-    Integer[] li = this.inputList;
-    Integer[] res = this.interList;
+    int n = size;
+    Integer[] li = inputList;
+    Integer[] res = interList;
     Integer[] next = new Integer[n]; // default null
     int[] inv = new int[n];
 
@@ -90,9 +90,9 @@ public class PermutationGenerator {
    * inputList is left unchanged, while interList contains the output and also returned.
    */
   public Integer[] largestSmallerNumbers() {
-    int n = this.size;
-    Integer[] li = this.inputList;
-    Integer[] res = this.interList;
+    int n = size;
+    Integer[] li = inputList;
+    Integer[] res = interList;
     Integer[] next = new Integer[n]; // next smaller value
     int[] inv = new int[n];
 
@@ -136,21 +136,24 @@ public class PermutationGenerator {
    * Both inputList and interList are mutated.
    */
   public void shuffle() {
-    this.interList = this.inputList.clone();
-    for (int i = 0; i < this.size; i++) {
+    interList = inputList.clone();
+    for (int i = 0; i < size; i++) {
       // swapping random indexes
-      int rand = (int) (Math.random() * this.size);
-      int temp = this.interList[i];
-      this.interList[i] = this.interList[rand];
-      this.interList[rand] = temp;
+      int rand = (int) (Math.random() * size);
+      int temp = interList[i];
+      interList[i] = interList[rand];
+      interList[rand] = temp;
     }
-    this.inputList = this.interList.clone();
+    inputList = interList.clone();
   }
 
+  /*
+   * Initial brute force algo for SLN
+   */
   public Integer[] bruteForce() {
-    int n = this.size;
-    Integer[] li = this.inputList;
-    Integer[] res = this.interList;
+    int n = size;
+    Integer[] li = inputList;
+    Integer[] res = interList;
 
     for (int i = 0; i < n; i++) {
       Integer smallest = null;
@@ -171,11 +174,11 @@ public class PermutationGenerator {
   // ---------- The following methods are used for testing
 
   public void printInput() {
-    printList("Input", this.inputList);
+    printList("Input", inputList);
   }
 
   public void printInter() {
-    printList("Inter", this.interList);
+    printList("Inter", interList);
   }
 
   static void printList(String title, Integer[] li) {
