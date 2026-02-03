@@ -60,6 +60,10 @@ public class ArrayListStack<T> implements Stack<T> {
     length++;
   }
 
+  public int getLength() {
+    return length;
+  }
+
   record Parenthesis(char p, int line) {}
 
   public static void validParentheses(String fileName) {
@@ -96,14 +100,20 @@ public class ArrayListStack<T> implements Stack<T> {
 
     if (!stack.empty() && res) {
       res = false;
+      String[] inOrder = new String[stack.getLength()];
+      int added = 0;
       while (!stack.empty()) {
         Parenthesis curr = stack.pop();
-        P(
+
+        inOrder[added++] =
             "Opening parenthesis: "
                 + curr.p()
                 + " at line "
                 + curr.line()
-                + " missing closing parenthesis");
+                + " missing closing parenthesis";
+      }
+      for (String s : inOrder) {
+        P(s);
       }
     }
 
