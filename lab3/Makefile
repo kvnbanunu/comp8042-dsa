@@ -1,0 +1,2 @@
+bst:
+	@java BSTChecker.java
