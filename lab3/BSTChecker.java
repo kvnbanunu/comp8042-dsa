@@ -26,88 +26,46 @@ public class BSTChecker {
   Set<Integer> seen = new HashSet<>();
 
   boolean isBinarySearchTree(GenericTree<Integer> tree) {
-    if (tree.getRoot().isLeaf()) return true;
-
-    if (!isBinary(tree)) return false;
-
-    int numChildren = numChildren(tree);
-    int rootVal = tree.getRoot().getValue();
-    seen.add(rootVal);
-
-    GenericTreeNode<Integer> left = tree.getRoot().getChildren().get(0);
-    seen.add(left.getValue());
-
-    if (numChildren == 1) {
-      return isBSTLeft(left, rootVal);
-    }
-
-    GenericTreeNode<Integer> right = tree.getRoot().getChildren().get(1);
-    seen.add(right.getValue());
-    return isBSTLeft(left, rootVal) && isBSTRight(right, rootVal);
+    GenericTreeNode<Integer> root = tree.getRoot();
+    return isBSTNode(root, 0, "root");
   }
 
-  boolean isBSTLeft(GenericTreeNode<Integer> node, int max) {
+  boolean isBSTNode(GenericTreeNode<Integer> node, int parentVal, String type) {
     if (node.isLeaf()) return true;
 
-    if (!isBinary(node)) return false;
+    int numChildren = node.getChildren().size();
+    if (numChildren > 2) return false;
 
-    int numChildren = numChildren(node);
-    int val = node.getValue();
+    int nodeVal = node.getValue();
 
-    if (val > max) return false;
+    switch (type) {
+      case "root":
+        break;
+      case "left":
+        if (nodeVal > parentVal) return false;
+        break;
+      case "right":
+        if (nodeVal < parentVal) return false;
+        break;
+    }
 
     GenericTreeNode<Integer> left = node.getChildren().get(0);
-    if (seen.contains(left.getValue())) return false;
-    seen.add(left.getValue());
+    int leftVal = left.getValue();
+
+    if (seen.contains(leftVal)) return false;
+    seen.add(leftVal);
 
     if (numChildren == 1) {
-      return isBSTLeft(left, val);
+      return isBSTNode(left, nodeVal, "left");
     }
 
     GenericTreeNode<Integer> right = node.getChildren().get(1);
-    if (seen.contains(right.getValue())) return false;
-    seen.add(right.getValue());
-    return isBSTLeft(left, val) && isBSTRight(right, val);
-  }
+    int rightVal = right.getValue();
 
-  boolean isBSTRight(GenericTreeNode<Integer> node, int min) {
-    if (node.isLeaf()) return true;
+    if (seen.contains(rightVal)) return false;
+    seen.add(rightVal);
 
-    if (!isBinary(node)) return false;
-
-    int numChildren = numChildren(node);
-    int val = node.getValue();
-
-    if (val < min) return false;
-
-    GenericTreeNode<Integer> left = node.getChildren().get(0);
-    if (seen.contains(left.getValue())) return false;
-    seen.add(left.getValue());
-
-    if (numChildren == 1) {
-      return isBSTLeft(left, val);
-    }
-
-    GenericTreeNode<Integer> right = node.getChildren().get(1);
-    if (seen.contains(right.getValue())) return false;
-    seen.add(right.getValue());
-    return isBSTLeft(left, val) && isBSTRight(right, val);
-  }
-
-  int numChildren(GenericTree<Integer> tree) {
-    return tree.getRoot().getChildren().size();
-  }
-
-  int numChildren(GenericTreeNode<Integer> node) {
-    return node.getChildren().size();
-  }
-
-  boolean isBinary(GenericTree<Integer> tree) {
-    return numChildren(tree) <= 2;
-  }
-
-  boolean isBinary(GenericTreeNode<Integer> node) {
-    return numChildren(node) <= 2;
+    return isBSTNode(left, nodeVal, "left") && isBSTNode(right, nodeVal, "right");
   }
 
   public static void main(String[] args) {
