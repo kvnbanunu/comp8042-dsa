@@ -12,47 +12,86 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Queue;
+import java.util.Set;
 import java.util.Stack;
 import java.util.function.Function;
 
 public class BSTChecker {
+  Set<Integer> seen = new HashSet<>();
+
   boolean isBinarySearchTree(GenericTree<Integer> tree) {
-    if (isLeaf(tree)) return true;
+    if (tree.getRoot().isLeaf()) return true;
 
     if (!isBinary(tree)) return false;
 
     int numChildren = numChildren(tree);
+    int rootVal = tree.getRoot().getValue();
+    seen.add(rootVal);
 
     GenericTreeNode<Integer> left = tree.getRoot().getChildren().get(0);
+    seen.add(left.getValue());
 
     if (numChildren == 1) {
-      return isBinarySearchTree(left);
+      return isBSTLeft(left, rootVal);
     }
 
     GenericTreeNode<Integer> right = tree.getRoot().getChildren().get(1);
-    return isBinarySearchTree(left) && isBinarySearchTree(right);
+    seen.add(right.getValue());
+    return isBSTLeft(left, rootVal) && isBSTRight(right, rootVal);
   }
 
-  boolean isBinarySearchTree(GenericTreeNode<Integer> node) {
-    if (isLeaf(node)) return true;
+  boolean isBSTLeft(GenericTreeNode<Integer> node, int max) {
+    if (node.isLeaf()) return true;
 
     if (!isBinary(node)) return false;
 
     int numChildren = numChildren(node);
+    int val = node.getValue();
+
+    if (val > max) return false;
 
     GenericTreeNode<Integer> left = node.getChildren().get(0);
+    if (seen.contains(left.getValue())) return false;
+    seen.add(left.getValue());
 
     if (numChildren == 1) {
-      return isBinarySearchTree(left);
+      return isBSTLeft(left, val);
     }
 
     GenericTreeNode<Integer> right = node.getChildren().get(1);
-    return isBinarySearchTree(left) && isBinarySearchTree(right);
+    if (seen.contains(right.getValue())) return false;
+    seen.add(right.getValue());
+    return isBSTLeft(left, val) && isBSTRight(right, val);
+  }
+
+  boolean isBSTRight(GenericTreeNode<Integer> node, int min) {
+    if (node.isLeaf()) return true;
+
+    if (!isBinary(node)) return false;
+
+    int numChildren = numChildren(node);
+    int val = node.getValue();
+
+    if (val < min) return false;
+
+    GenericTreeNode<Integer> left = node.getChildren().get(0);
+    if (seen.contains(left.getValue())) return false;
+    seen.add(left.getValue());
+
+    if (numChildren == 1) {
+      return isBSTLeft(left, val);
+    }
+
+    GenericTreeNode<Integer> right = node.getChildren().get(1);
+    if (seen.contains(right.getValue())) return false;
+    seen.add(right.getValue());
+    return isBSTLeft(left, val) && isBSTRight(right, val);
   }
 
   int numChildren(GenericTree<Integer> tree) {
@@ -63,14 +102,6 @@ public class BSTChecker {
     return node.getChildren().size();
   }
 
-  boolean isLeaf(GenericTree<Integer> tree) {
-    return numChildren(tree) == 0;
-  }
-
-  boolean isLeaf(GenericTreeNode<Integer> node) {
-    return numChildren(node) == 0;
-  }
-
   boolean isBinary(GenericTree<Integer> tree) {
     return numChildren(tree) <= 2;
   }
@@ -79,17 +110,27 @@ public class BSTChecker {
     return numChildren(node) <= 2;
   }
 
-  boolean validateLeft(GenericTree<Integer> tree) {
-    if (numChildren(tree) > 0) {
-      return isBinary(tree.getRoot().getChildren().get(0));
+  public static void main(String[] args) {
+    try {
+      GenericTree<Integer> t1 =
+          DotFileReader.createTreeFromDotFile("./test1.dot", Integer::parseInt);
+      BSTChecker checker = new BSTChecker();
+      System.out.println("Test 1: " + checker.isBinarySearchTree(t1));
+      GenericTree<Integer> t2 =
+          DotFileReader.createTreeFromDotFile("./test2.dot", Integer::parseInt);
+      checker = new BSTChecker();
+      System.out.println("Test 2: " + checker.isBinarySearchTree(t2));
+      GenericTree<Integer> t3 =
+          DotFileReader.createTreeFromDotFile("./test3.dot", Integer::parseInt);
+      checker = new BSTChecker();
+      System.out.println("Test 3: " + checker.isBinarySearchTree(t3));
+      GenericTree<Integer> t4 =
+          DotFileReader.createTreeFromDotFile("./test4.dot", Integer::parseInt);
+      checker = new BSTChecker();
+      System.out.println("Test 4: " + checker.isBinarySearchTree(t4));
+    } catch (IOException e) {
+      e.printStackTrace();
     }
-
-    return false;
-  }
-
-  boolean validateRight() {
-
-    return false;
   }
 }
 
