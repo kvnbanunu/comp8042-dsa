@@ -13,3 +13,15 @@ or
 ```
 java BSTChecker.java
 ```
+
+## AVL Tree Contact List
+
+```sh
+make avl
+```
+
+or
+
+```
+java ContactList.java
+```

@@ -20,7 +20,267 @@ import java.util.Queue;
 import java.util.Stack;
 import java.util.function.Function;
 
-public class AVLContactList {}
+public class ContactList {
+  private AvlTree<Contact> contacts;
+  private ArrayList<Contact> inOrder;
+  private int size;
+
+  public ContactList() {
+    contacts = new AvlTree<Contact>();
+    size = 0;
+  }
+
+  public void insertContact(Contact c) {
+    contacts.insert(c);
+    size++;
+  }
+
+  public Contact findContact(String name) {
+    Contact found = findContact(name, contacts.getRoot());
+    if (found == null) {
+      System.out.println("Contact: '" + name + "' not found.");
+    }
+    return found;
+  }
+
+  // recursive helper for findContact
+  private Contact findContact(String name, AvlTreeNode<Contact> root) {
+    if (root == null) return null;
+
+    int comparison = name.compareToIgnoreCase(root.getValue().getName());
+
+    if (comparison == 0) {
+      return root.getValue();
+    } else if (comparison < 0) {
+      return findContact(name, root.getLeftChild());
+    } else {
+      return findContact(name, root.getRightChild());
+    }
+  }
+
+  public void removeContact(String name) {
+    Contact found = findContact(name);
+    if (found == null) return;
+
+    contacts.remove(found);
+    size--;
+
+    System.out.println("Removed - " + found);
+  }
+
+  // inOrderTraversal for AVLTree to help with the getList methods
+  private void inOrderTraverse(AvlTreeNode<Contact> node) {
+    if (node == null) return;
+    inOrderTraverse(node.getLeftChild());
+    inOrder.add(node.getValue());
+    inOrderTraverse(node.getRightChild());
+  }
+
+  public List<Contact> getEveryContact() {
+    if (inOrder != null && inOrder.size() == size) {
+      return inOrder;
+    }
+    inOrder = new ArrayList<>(size);
+    inOrderTraverse(contacts.getRoot());
+    return inOrder;
+  }
+
+  public List<Contact> getEveryContactStartingWith(char letter) {
+    if (inOrder == null || inOrder.size() != size) {
+      inOrder = new ArrayList<>(size);
+      inOrderTraverse(contacts.getRoot());
+    }
+
+    List<Contact> res = new ArrayList<>(size);
+
+    boolean found = false;
+
+    for (int i = 0; i < size; i++) {
+      Contact c = inOrder.get(i);
+      if (c.getName().toLowerCase().charAt(0) == letter) {
+        res.add(c);
+        found = true;
+      } else if (found) {
+        break;
+      }
+    }
+
+    return res;
+  }
+
+  public List<Contact> getStringMatchingContacts(String segment) {
+    if (inOrder == null || inOrder.size() != size) {
+      inOrder = new ArrayList<>(size);
+      inOrderTraverse(contacts.getRoot());
+    }
+
+    List<Contact> list = new ArrayList<>(size);
+
+    for (Contact c : inOrder) {
+      if (contains(c.getName(), segment)) {
+        list.add(c);
+      }
+    }
+    return list;
+  }
+
+  private boolean contains(String s, String segment) {
+    s = s.toLowerCase();
+    segment = segment.toLowerCase();
+    int i = 0;
+
+    while (s.length() - i >= segment.length()) {
+      if (s.charAt(i) == segment.charAt(0)) {
+        int j = i;
+        while (j - i < segment.length()) {
+          if (s.charAt(j) != segment.charAt(j - i)) break;
+          j++;
+          if (j - i == segment.length()) return true;
+        }
+      }
+      i++;
+    }
+    return false;
+  }
+
+  // generates a random string of 10 numbers
+  private static String randPhone() {
+    String res = "";
+    for (int i = 0; i < 11; i++) {
+      res += (int) (Math.random() * 10);
+    }
+    return res;
+  }
+
+  public static void main(String[] args) {
+    ContactList cl = new ContactList();
+    cl.insertContact(new Contact("Yang, Victor", "vyang@bcit.ca", randPhone()));
+    cl.insertContact(new Contact("Laviolette, Lucas", "llaviolette@bcit.ca", randPhone()));
+    cl.insertContact(new Contact("Chuah, Josh", "jchuah@bcit.ca", randPhone()));
+    cl.insertContact(new Contact("Reziapov, Timur", "treziapov@bcit.ca", randPhone()));
+    cl.insertContact(new Contact("Li, Louise", "lli@bcit.ca", randPhone()));
+    cl.insertContact(new Contact("Lin, Joe", "jlin@bcit.ca", randPhone()));
+    cl.insertContact(new Contact("Seo, Brian", "bseo@bcit.ca", randPhone()));
+    cl.insertContact(new Contact("Zohoori Rad, Sepehr", "szohoorirad@bcit.ca", randPhone()));
+    cl.insertContact(new Contact("Sue, Wilson", "wsue@bcit.ca", randPhone()));
+    cl.insertContact(new Contact("Dunnet, Kohei", "@bcit.ca", randPhone()));
+    cl.insertContact(new Contact("Gonzales, Evin", "egonzales@bcit.ca", randPhone()));
+    cl.insertContact(new Contact("Nguyen, Kevin", "knguyen@bcit.ca", randPhone()));
+    cl.insertContact(new Contact("Bartyuk, Nathan", "nbartyuk@bcit.ca", randPhone()));
+    cl.insertContact(new Contact("Ramdev, Madhav", "mrandev@bcit.ca", randPhone()));
+    cl.insertContact(new Contact("Surilla, Raziel", "rsurilla@bcit.ca", randPhone()));
+    cl.insertContact(new Contact("Guo, John", "jguo@bcit.ca", randPhone()));
+    cl.insertContact(new Contact("Hunter, Clay", "chunter@bcit.ca", randPhone()));
+    cl.insertContact(new Contact("Clarito, Fonse", "fclarito@bcit.ca", randPhone()));
+    cl.insertContact(new Contact("Winaldo, Nicholas", "nwinaldo@bcit.ca", randPhone()));
+    cl.insertContact(new Contact("Melnick, Reese", "rmelnick@bcit.ca", randPhone()));
+    cl.insertContact(new Contact("Purtell, Keagan", "kpurtell@bcit.ca", randPhone()));
+    cl.insertContact(new Contact("Baek, Seung Jae", "sjbaek@bcit.ca", randPhone()));
+    cl.insertContact(new Contact("Rada, Brandon", "brada@bcit.ca", randPhone()));
+    cl.insertContact(new Contact("Klein, Blaise", "bklein@bcit.ca", randPhone()));
+    cl.insertContact(new Contact("Angelozzi, Lucas", "langelozzi@bcit.ca", randPhone()));
+
+    System.out.println("Finding Contact with name 'Nguyen, Kevin'");
+
+    Contact found = cl.findContact("Nguyen, Kevin");
+    if (found != null) {
+      System.out.println(found);
+    }
+
+    System.out.println("\nEvery Contact in alphabetical order");
+    for (Contact c : cl.getEveryContact()) {
+      System.out.println(c);
+    }
+
+    System.out.println("\nEvery Contact starting with 'l'");
+    for (Contact c : cl.getEveryContactStartingWith('l')) {
+      System.out.println(c);
+    }
+
+    System.out.println("\nEvery Contact containing the string: 'la'");
+    for (Contact c : cl.getStringMatchingContacts("la")) {
+      System.out.println(c);
+    }
+
+    System.out.println(
+        "\n"
+            + "Removing Contacts: [Nguyen, Kevin; Laviolette, Lucas; Clarito Fonse; Winaldo,"
+            + " Nicholas]");
+    cl.removeContact("Nguyen, Kevin");
+    cl.removeContact("Laviolette, Lucas");
+    cl.removeContact("Clarito, Fonse");
+    cl.removeContact("Winaldo, Nicholas");
+
+    System.out.println("\nRerunning tests...");
+
+    System.out.println("\nFinding Contact with name 'Nguyen, Kevin'");
+
+    found = cl.findContact("Nguyen, Kevin");
+    if (found != null) {
+      System.out.println(found);
+    }
+    System.out.println("\nEvery Contact in alphabetical order");
+    for (Contact c : cl.getEveryContact()) {
+      System.out.println(c);
+    }
+
+    System.out.println("\nEvery Contact starting with 'l'");
+    for (Contact c : cl.getEveryContactStartingWith('l')) {
+      System.out.println(c);
+    }
+
+    System.out.println("\nEvery Contact containing the string: 'la'");
+    for (Contact c : cl.getStringMatchingContacts("la")) {
+      System.out.println(c);
+    }
+  }
+}
+
+// needs to implement Comparable to work as an AvlTreeNode
+class Contact implements Comparable<Contact> {
+  private String name;
+  private String email;
+  private String phone;
+
+  @Override
+  public int compareTo(Contact other) {
+    return this.name.compareToIgnoreCase(other.name);
+  }
+
+  public Contact(String name, String email, String phone) {
+    this.name = name;
+    this.email = email;
+    this.phone = phone;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public String getEmail() {
+    return email;
+  }
+
+  public String getPhone() {
+    return phone;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public void setEmail(String email) {
+    this.email = email;
+  }
+
+  public void setPhone(String phone) {
+    this.phone = phone;
+  }
+
+  public String toString() {
+    return String.format("Name: %-20s Email: %-20s Phone: %s", name, email, phone);
+  }
+}
 
 /*******************************************************
  * The code below was provided for the lab assignment. *
