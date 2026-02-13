@@ -3,3 +3,6 @@ bst:
 
 avl:
 	@java ContactList.java
+
+graph:
+	@java FriendGraph.java

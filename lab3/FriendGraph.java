@@ -12,15 +12,375 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Queue;
+import java.util.Set;
 import java.util.Stack;
 import java.util.function.Function;
 
-public class SocialNetwork {}
+public class FriendGraph {
+  private Map<String, Set<String>> adjacencyList;
+  private ContactList cl;
+
+  public FriendGraph() {
+    adjacencyList = new HashMap<>();
+    cl = new ContactList();
+  }
+
+  public void addContact(String c) {
+    if (c == null) return;
+    adjacencyList.putIfAbsent(c, new LinkedHashSet<>());
+    cl.insertContact(c);
+  }
+
+  public void removeContact(String name) {
+    String found = cl.findContact(name);
+    if (found == null) {
+      return;
+    }
+
+    // remove contact from everyones friends list
+    Set<String> friends = adjacencyList.getOrDefault(found, Collections.emptySet());
+    for (String f : friends) {
+      adjacencyList.get(f).remove(found);
+    }
+
+    // remove the contact
+    adjacencyList.remove(found);
+    cl.removeContact(name);
+  }
+
+  public void addFriend(String name1, String name2) {
+    String c1 = cl.findContact(name1);
+    String c2 = cl.findContact(name2);
+
+    if (c1 == null || c2 == null) {
+      // one of the contacts not found
+      return;
+    }
+
+    adjacencyList.get(c1).add(c2);
+    adjacencyList.get(c2).add(c1);
+  }
+
+  public void removeFriend(String name1, String name2) {
+    String c1 = cl.findContact(name1);
+    String c2 = cl.findContact(name2);
+
+    if (c1 == null || c2 == null) {
+      return;
+    }
+
+    boolean removed1 = adjacencyList.getOrDefault(c1, Collections.emptySet()).remove(c2);
+    boolean removed2 = adjacencyList.getOrDefault(c2, Collections.emptySet()).remove(c1);
+
+    if (!removed1 && !removed2) {
+      System.out.println(
+          "Contacts '" + name1 + "' and '" + name2 + "' were not friends to begin with");
+    }
+  }
+
+  public void printFriends(String name) {
+    String found = cl.findContact(name);
+    if (found == null) {
+      return;
+    }
+
+    Set<String> friends = adjacencyList.get(found);
+    if (friends.isEmpty()) {
+      System.out.println("Contact: '" + name + "' has no friends");
+      return;
+    }
+
+    System.out.println("Friends list for '" + name + "':");
+    for (String f : friends) {
+      System.out.println("\t" + f);
+    }
+  }
+
+  public void printMostFriendsOfFriends() {
+    if (adjacencyList.isEmpty()) {
+      System.out.println("Graph is empty");
+      return;
+    }
+
+    String best = null;
+    int highest = -1;
+
+    for (Map.Entry<String, Set<String>> entry : adjacencyList.entrySet()) {
+      String c = entry.getKey();
+      Set<String> firstDegree = entry.getValue();
+
+      Set<String> fof = new HashSet<>();
+      for (String f : firstDegree) {
+        fof.addAll(adjacencyList.get(f));
+      }
+
+      fof.remove(c);
+      fof.removeAll(firstDegree);
+
+      int count = fof.size();
+      if (count > highest) {
+        highest = count;
+        best = c;
+      }
+    }
+
+    if (best == null || highest == 0) {
+      System.out.println("No friends of friends found");
+      return;
+    }
+
+    System.out.println(
+        "Contact with the most friends of friends: '" + best + "' | " + highest + " friends");
+  }
+
+  public void printShortestPath(String startName, String endName) {
+    String start = cl.findContact(startName);
+    String end = cl.findContact(endName);
+
+    if (start == null || end == null) {
+      return;
+    }
+
+    if (start.equals(end)) {
+      System.out.println("Error: " + startName + " == " + endName);
+      return;
+    }
+
+    Queue<String> q = new LinkedList<>();
+    Map<String, String> from = new HashMap<>();
+
+    q.add(start);
+    from.put(start, null);
+
+    boolean found = false;
+
+    while (!q.isEmpty()) {
+      String curr = q.poll();
+
+      if (curr.equals(end)) {
+        found = true;
+        break;
+      }
+
+      for (String n : adjacencyList.get(curr)) {
+        if (!from.containsKey(n)) {
+          from.put(n, curr);
+          q.add(n);
+        }
+      }
+    }
+
+    if (!found) {
+      System.out.println("No connection between '" + startName + "' & '" + endName + "'");
+      return;
+    }
+
+    // walk back from end
+    List<String> path = new ArrayList<>();
+    String next = end;
+    while (next != null) {
+      path.add(next);
+      next = from.get(next);
+    }
+
+    // directly friends
+    if (path.size() == 2) {
+      System.out.println(startName + " is friends with " + endName);
+      return;
+    }
+
+    String res = startName;
+    for (int i = path.size() - 2; i >= 0; i--) {
+      res += " -> " + path.get(i);
+    }
+    System.out.println(res);
+  }
+
+  public static void main(String[] args) {
+    FriendGraph G = new FriendGraph();
+    // ommitted last names for better flow
+    G.addContact("Victor");
+    G.addContact("Lucas");
+    G.addContact("Josh");
+    G.addContact("Timur");
+    G.addContact("Louise");
+    G.addContact("Joe");
+    G.addContact("Brian");
+    G.addContact("Sepehr");
+    G.addContact("Wilson");
+    G.addContact("Kohei");
+    G.addContact("Evin");
+    G.addContact("Kevin");
+    G.addContact("Nathan");
+    G.addContact("Madhav");
+    G.addContact("Raziel");
+    G.addContact("John");
+    G.addContact("Clay");
+    G.addContact("Fonse");
+    G.addContact("Nicholas");
+    G.addContact("Reese");
+    G.addContact("Keagan");
+    G.addContact("Seung Jae");
+    G.addContact("Brandon");
+    G.addContact("Blaise");
+
+    G.addFriend("Kevin", "Evin");
+    G.addFriend("Kevin", "Lucas");
+    G.addFriend("Evin", "Lucas");
+    G.addFriend("Lucas", "Sepehr");
+    G.addFriend("Sepehr", "Evin");
+    G.addFriend("Lucas", "Reese");
+
+    G.printFriends("Kevin");
+    G.printFriends("Sepehr");
+
+    G.printMostFriendsOfFriends();
+
+    G.printShortestPath("Kevin", "Sepehr");
+
+    G.removeFriend("Evin", "Sepehr");
+
+    G.printShortestPath("Kevin", "Sepehr");
+  }
+}
+
+/***********************************************
+ * Slightly altered ContactList from section 2 *
+ * Contact is simplified to just a String name *
+ ***********************************************/
+
+class ContactList {
+  private AvlTree<String> contacts;
+  private ArrayList<String> inOrder;
+  private int size;
+
+  public ContactList() {
+    contacts = new AvlTree<String>();
+    size = 0;
+  }
+
+  public void insertContact(String c) {
+    contacts.insert(c);
+    size++;
+  }
+
+  public String findContact(String name) {
+    String found = findContact(name, contacts.getRoot());
+    if (found == null) {
+      System.out.println("Contact: '" + name + "' not found.");
+    }
+    return found;
+  }
+
+  // recursive helper for findContact
+  private String findContact(String name, AvlTreeNode<String> root) {
+    if (root == null) return null;
+
+    int comparison = name.compareToIgnoreCase(root.getValue());
+
+    if (comparison == 0) {
+      return root.getValue();
+    } else if (comparison < 0) {
+      return findContact(name, root.getLeftChild());
+    } else {
+      return findContact(name, root.getRightChild());
+    }
+  }
+
+  public void removeContact(String name) {
+    String found = findContact(name);
+    if (found == null) return;
+
+    contacts.remove(found);
+    size--;
+    System.out.println("Removed from contact list - " + found);
+  }
+
+  // inOrderTraversal for AVLTree to help with the getList methods
+  private void inOrderTraverse(AvlTreeNode<String> node) {
+    if (node == null) return;
+    inOrderTraverse(node.getLeftChild());
+    inOrder.add(node.getValue());
+    inOrderTraverse(node.getRightChild());
+  }
+
+  public List<String> getEveryContact() {
+    if (inOrder != null && inOrder.size() == size) {
+      return inOrder;
+    }
+    inOrder = new ArrayList<>(size);
+    inOrderTraverse(contacts.getRoot());
+    return inOrder;
+  }
+
+  public List<String> getEveryContactStartingWith(char letter) {
+    if (inOrder == null || inOrder.size() != size) {
+      inOrder = new ArrayList<>(size);
+      inOrderTraverse(contacts.getRoot());
+    }
+
+    List<String> res = new ArrayList<>(size);
+
+    boolean found = false;
+
+    for (int i = 0; i < size; i++) {
+      String c = inOrder.get(i);
+      if (c.toLowerCase().charAt(0) == letter) {
+        res.add(c);
+        found = true;
+      } else if (found) {
+        break;
+      }
+    }
+
+    return res;
+  }
+
+  public List<String> getStringMatchingContacts(String segment) {
+    if (inOrder == null || inOrder.size() != size) {
+      inOrder = new ArrayList<>(size);
+      inOrderTraverse(contacts.getRoot());
+    }
+
+    List<String> list = new ArrayList<>(size);
+
+    for (String c : inOrder) {
+      if (contains(c, segment)) {
+        list.add(c);
+      }
+    }
+    return list;
+  }
+
+  private boolean contains(String s, String segment) {
+    s = s.toLowerCase();
+    segment = segment.toLowerCase();
+    int i = 0;
+
+    while (s.length() - i >= segment.length()) {
+      if (s.charAt(i) == segment.charAt(0)) {
+        int j = i;
+        while (j - i < segment.length()) {
+          if (s.charAt(j) != segment.charAt(j - i)) break;
+          j++;
+          if (j - i == segment.length()) return true;
+        }
+      }
+      i++;
+    }
+    return false;
+  }
+}
 
 /*******************************************************
  * The code below was provided for the lab assignment. *

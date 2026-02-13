@@ -25,3 +25,15 @@ or
 ```
 java ContactList.java
 ```
+
+## Social Network
+
+```sh
+make graph
+```
+
+or
+
+```
+java FriendGraph.java
+```
