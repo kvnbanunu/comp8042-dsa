@@ -24,23 +24,26 @@ public class ContactList {
   private AvlTree<Contact> contacts;
   private ArrayList<Contact> inOrder;
   private int size;
+  private boolean edited;
 
   public ContactList() {
     contacts = new AvlTree<Contact>();
     size = 0;
+    edited = false;
   }
 
   public void insertContact(Contact c) {
+    if (findContact(c.getName()) != null) {
+      return;
+    }
     contacts.insert(c);
     size++;
+    edited = true;
   }
 
   public Contact findContact(String name) {
-    Contact found = findContact(name, contacts.getRoot());
-    if (found == null) {
-      System.out.println("Contact: '" + name + "' not found.");
-    }
-    return found;
+    // can be null
+    return findContact(name, contacts.getRoot());
   }
 
   // recursive helper for findContact
@@ -64,6 +67,7 @@ public class ContactList {
 
     contacts.remove(found);
     size--;
+    edited = true;
 
     System.out.println("Removed - " + found);
   }
@@ -77,41 +81,74 @@ public class ContactList {
   }
 
   public List<Contact> getEveryContact() {
-    if (inOrder != null && inOrder.size() == size) {
+    if (size == 0) {
+      return new ArrayList<>();
+    }
+    if (inOrder != null && !edited) {
       return inOrder;
     }
     inOrder = new ArrayList<>(size);
     inOrderTraverse(contacts.getRoot());
+    edited = false;
     return inOrder;
   }
 
   public List<Contact> getEveryContactStartingWith(char letter) {
-    if (inOrder == null || inOrder.size() != size) {
+    if (size == 0) {
+      return new ArrayList<>();
+    }
+    if (inOrder == null || edited) {
       inOrder = new ArrayList<>(size);
       inOrderTraverse(contacts.getRoot());
+      edited = false;
     }
 
-    List<Contact> res = new ArrayList<>(size);
+    int[] bounds = findBounds(letter);
+    if (bounds[0] == 0) {
+      return new ArrayList<>(); // empty
+    }
 
-    boolean found = false;
+    return inOrder.subList(bounds[1], bounds[2]);
+  }
 
-    for (int i = 0; i < size; i++) {
-      Contact c = inOrder.get(i);
-      if (c.getName().toLowerCase().charAt(0) == letter) {
-        res.add(c);
-        found = true;
-      } else if (found) {
-        break;
+  private int[] findBounds(char letter) {
+    int l = 0;
+    int r = size - 1;
+
+    while (l <= r) {
+      int m = l + (r - l) / 2;
+      if (inOrder.get(m).getName().toLowerCase().charAt(0) == letter) {
+        l = m;
+        r = m;
+
+        while (inOrder.get(l).getName().toLowerCase().charAt(0) == letter) {
+          l--;
+        }
+
+        while (inOrder.get(r).getName().toLowerCase().charAt(0) == letter) {
+          r++;
+        }
+
+        return new int[] {1, l + 1, r};
+
+      } else if (inOrder.get(m).getName().toLowerCase().charAt(0) > letter) {
+        r = m - 1;
+      } else {
+        l = m + 1;
       }
     }
 
-    return res;
+    return new int[] {0};
   }
 
   public List<Contact> getStringMatchingContacts(String segment) {
-    if (inOrder == null || inOrder.size() != size) {
+    if (size == 0) {
+      return new ArrayList<>();
+    }
+    if (inOrder == null || edited) {
       inOrder = new ArrayList<>(size);
       inOrderTraverse(contacts.getRoot());
+      edited = false;
     }
 
     List<Contact> list = new ArrayList<>(size);
@@ -185,6 +222,8 @@ public class ContactList {
     Contact found = cl.findContact("Nguyen, Kevin");
     if (found != null) {
       System.out.println(found);
+    } else {
+      System.out.println("Contact: Nguyen, Kevin not found.");
     }
 
     System.out.println("\nEvery Contact in alphabetical order");
@@ -218,6 +257,8 @@ public class ContactList {
     found = cl.findContact("Nguyen, Kevin");
     if (found != null) {
       System.out.println(found);
+    } else {
+      System.out.println("Contact: Nguyen, Kevin not found.");
     }
     System.out.println("\nEvery Contact in alphabetical order");
     for (Contact c : cl.getEveryContact()) {

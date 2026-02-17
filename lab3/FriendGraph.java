@@ -246,10 +246,13 @@ public class FriendGraph {
 
     G.printMostFriendsOfFriends();
 
+    System.out.println("\nShortest path between Kevin and Sepehr");
     G.printShortestPath("Kevin", "Sepehr");
 
+    System.out.println("\nRemove Evin from Sepehr");
     G.removeFriend("Evin", "Sepehr");
 
+    System.out.println("\nShortest path between Kevin and Sepehr");
     G.printShortestPath("Kevin", "Sepehr");
   }
 }
