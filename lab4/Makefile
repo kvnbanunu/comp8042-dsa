@@ -1,0 +1,2 @@
+names:
+	@java Names.java
