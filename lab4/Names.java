@@ -1,10 +1,27 @@
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Scanner;
 
 public class Names {
   public static void main(String[] args) {
-    SeparateChainHashTable SCHT = new SeparateChainHashTable();
+    File namesFile = new File("first.txt");
+    String[] names = new String[19948];
+    int index = 0;
 
+    try (Scanner scan = new Scanner(namesFile)) {
+      while (scan.hasNextLine()) {
+        String line = scan.nextLine();
+        names[index++] = line;
+      }
+    } catch (FileNotFoundException e) {
+      System.out.println("File not found");
+      e.printStackTrace();
+    }
+
+    SeparateChainHashTable SCHT = new SeparateChainHashTable();
+    QuadraticProbingHashTable QPHT = new QuadraticProbingHashTable();
     long startTime = System.currentTimeMillis();
 
     long endTime = System.currentTimeMillis();
@@ -13,7 +30,30 @@ public class Names {
   }
 }
 
-class SeparateChainHashTable {
+abstract class Hasher {
+  int numInsertions = 0;
+  int totalCollisions = 0;
+
+  public abstract void insert(String x);
+
+  public abstract void getName(String x);
+
+  public abstract int getTableSize();
+
+  public abstract int getOccupied();
+
+  public void getAverageCollisions() {}
+
+  public void getTotalCollisions() {}
+
+  public void getEmptySlots() {}
+
+  public void getLoadFactor() {}
+
+  public void queryName(String[] names) {}
+}
+
+class SeparateChainHashTable extends Hasher {
 
   private static final int DEFAULT_TABLE_SIZE = 101;
   public List<String>[] theLists;
@@ -30,6 +70,36 @@ class SeparateChainHashTable {
     }
   }
 
+  @Override
+  public void getName(String x) {
+    int hashed = myhash(x);
+    List<String> whichList = theLists[hashed];
+    int position = 0;
+    for (String s : whichList) {
+      if (x == s) {
+        System.out.println("Found " + x + " Index: " + hashed + " Position: " + position);
+        break;
+      }
+      position++;
+    }
+    System.out.println(x + " not found.");
+  }
+
+  @Override
+  public int getTableSize() {
+    return theLists.length;
+  }
+
+  @Override
+  public int getOccupied() {
+    int numOccupied = 0;
+    for (List<String> l : theLists) {
+      if (l.size() > 0) numOccupied++;
+    }
+    return numOccupied;
+  }
+
+  @Override
   public void insert(String x) {
     List<String> whichList = theLists[myhash(x)];
     if (!whichList.contains(x)) {
@@ -98,7 +168,7 @@ class SeparateChainHashTable {
   }
 }
 
-class QuadraticProbingHashTable {
+class QuadraticProbingHashTable extends Hasher {
 
   private static final int DEFAULT_TABLE_SIZE = 101;
 
@@ -121,23 +191,38 @@ class QuadraticProbingHashTable {
     doClear();
   }
 
+  @Override
+  public void getName(String x) {
+    int found = findPos(x);
+    System.out.println("Found: " + x + " Index: " + found);
+  }
+
+  @Override
+  public int getTableSize() {
+    return theSize;
+  }
+
+  @Override
+  public int getOccupied() {
+    return occupied;
+  }
+
   /**
    * Insert into the hash table. If the item is already present, do nothing.
    *
    * @param x the item to insert.
    */
-  public boolean insert(String x) {
+  @Override
+  public void insert(String x) {
     // Insert x as active
     int currentPos = findPos(x);
-    if (isActive(currentPos)) return false;
+    if (isActive(currentPos)) return;
 
     array[currentPos] = new HashEntry(x, true);
     theSize++;
 
     // Rehash; see Section 5.5
     if (++occupied > array.length / 2) rehash();
-
-    return true;
   }
 
   /** Expand the hash table. */
