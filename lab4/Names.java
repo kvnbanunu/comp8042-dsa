@@ -20,21 +20,43 @@ public class Names {
       e.printStackTrace();
     }
 
-    SeparateChainHashTable SCHT = new SeparateChainHashTable();
-    QuadraticProbingHashTable QPHT = new QuadraticProbingHashTable();
-    long startTime = System.currentTimeMillis();
+    String[] toQuery = {
+      "Abdel",
+      "Almerinda",
+      "Astor",
+      "Bridgette",
+      "Cosmina",
+      "Driss",
+      "Evgenia",
+      "Girolamo",
+      "Huber",
+      "Jayro",
+      "Ken",
+      "Liqin",
+      "Marisca",
+      "Muhammed",
+      "Olinda",
+      "Ratiba",
+      "Sarama",
+      "Sthefany",
+      "Vaidas",
+      "Yamile",
+      "Zygmunt"
+    };
 
-    long endTime = System.currentTimeMillis();
-
-    System.out.println("Elapsed time: " + (endTime - startTime));
+    Hasher SCHT = new SeparateChainHashTable();
+    SCHT.runTests(names, toQuery);
+    Hasher QPHT = new QuadraticProbingHashTable();
+    QPHT.runTests(names, toQuery);
   }
 }
 
 abstract class Hasher {
+  String title;
   int numInsertions = 0;
   int totalCollisions = 0;
 
-  public abstract void insert(String x);
+  public abstract int insert(String x);
 
   public abstract void getName(String x);
 
@@ -42,15 +64,56 @@ abstract class Hasher {
 
   public abstract int getOccupied();
 
-  public void getAverageCollisions() {}
+  public void getAverageCollisions() {
+    double avg = (double) (totalCollisions) / (double) (numInsertions);
+    System.out.printf("Average Collisions: %.2f\n", avg);
+  }
 
-  public void getTotalCollisions() {}
+  public void getTotalCollisions() {
+    System.out.println("Total Collisions: " + totalCollisions);
+  }
 
-  public void getEmptySlots() {}
+  public void getEmptySlots() {
+    int empty = getTableSize() - getOccupied();
+    System.out.println("Empty Slots: " + empty);
+  }
 
-  public void getLoadFactor() {}
+  public void getLoadFactor() {
+    double load = (double) (getOccupied()) / (double) (getTableSize()) * 100;
+    System.out.println("Load Factor: " + load + "%");
+  }
 
-  public void queryName(String[] names) {}
+  public void queryNames(String[] names) {
+    System.out.println("Querying names");
+    long startTime = System.currentTimeMillis();
+
+    for (String n : names) {
+      getName(n);
+    }
+
+    long endTime = System.currentTimeMillis();
+    System.out.println("Elapsed time: " + (endTime - startTime));
+  }
+
+  public void Insert(String x) {
+    totalCollisions += insert(x);
+    numInsertions++;
+  }
+
+  public void runTests(String[] names, String[] toQuery) {
+    System.out.println("Starting tests for " + title);
+    System.out.println("Inserting names");
+    for (String name : names) {
+      Insert(name);
+    }
+    System.out.println("Inserting complete");
+    getAverageCollisions();
+    getTotalCollisions();
+    getEmptySlots();
+    getLoadFactor();
+    queryNames(toQuery);
+    System.out.println("Completed tests for " + title);
+  }
 }
 
 class SeparateChainHashTable extends Hasher {
@@ -64,6 +127,7 @@ class SeparateChainHashTable extends Hasher {
   }
 
   public SeparateChainHashTable(int size) {
+    title = "Separate Chain Hash Table";
     theLists = new LinkedList[nextPrime(size)];
     for (int i = 0; i < theLists.length; i++) {
       theLists[i] = new LinkedList<>();
@@ -100,12 +164,18 @@ class SeparateChainHashTable extends Hasher {
   }
 
   @Override
-  public void insert(String x) {
-    List<String> whichList = theLists[myhash(x)];
+  public int insert(String x) {
+    int hashed = myhash(x);
+    int collisions = 0;
+    List<String> whichList = theLists[hashed];
+    if (whichList.size() > 0) {
+      collisions++;
+    }
     if (!whichList.contains(x)) {
       whichList.add(x);
       if (++currentSize > theLists.length) rehash();
     }
+    return collisions;
   }
 
   public static int hash(String key, int tableSize) {
@@ -175,6 +245,7 @@ class QuadraticProbingHashTable extends Hasher {
   private HashEntry[] array; // The array of elements
   private int occupied; // The number of occupied cells
   private int theSize; // Current size
+  private int localCollisions = 0;
 
   /** Construct the hash table. */
   public QuadraticProbingHashTable() {
@@ -187,6 +258,7 @@ class QuadraticProbingHashTable extends Hasher {
    * @param size the approximate initial size.
    */
   public QuadraticProbingHashTable(int size) {
+    title = "Quadratic Probing Hash Table";
     allocateArray(size);
     doClear();
   }
@@ -213,16 +285,18 @@ class QuadraticProbingHashTable extends Hasher {
    * @param x the item to insert.
    */
   @Override
-  public void insert(String x) {
+  public int insert(String x) {
     // Insert x as active
     int currentPos = findPos(x);
-    if (isActive(currentPos)) return;
+    if (isActive(currentPos)) return 0;
 
     array[currentPos] = new HashEntry(x, true);
     theSize++;
 
     // Rehash; see Section 5.5
     if (++occupied > array.length / 2) rehash();
+
+    return localCollisions;
   }
 
   /** Expand the hash table. */
@@ -247,11 +321,14 @@ class QuadraticProbingHashTable extends Hasher {
   private int findPos(String x) {
     int offset = 1;
     int currentPos = myhash(x);
+    localCollisions = 0;
 
     while (array[currentPos] != null && !array[currentPos].element.equals(x)) {
       currentPos += offset; // Compute ith probe
       offset += 2;
       if (currentPos >= array.length) currentPos -= array.length;
+
+      localCollisions++;
     }
 
     return currentPos;
