@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.time.Instant;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Scanner;
@@ -7,7 +8,8 @@ import java.util.Scanner;
 public class Names {
   public static void main(String[] args) {
     File namesFile = new File("first.txt");
-    String[] names = new String[19948];
+    int size = nextPrime(19948);
+    String[] names = new String[size];
     int index = 0;
 
     try (Scanner scan = new Scanner(namesFile)) {
@@ -44,13 +46,36 @@ public class Names {
       "Zygmunt"
     };
 
-    Hasher SCHT = new SeparateChainHashTable();
+    Hasher SCHT = new SeparateChainHashTable(size);
     SCHT.runTests(names, toQuery);
-    Hasher QPHT = new QuadraticProbingHashTable();
+    Hasher QPHT = new QuadraticProbingHashTable(size);
     QPHT.runTests(names, toQuery);
+  }
+
+  public static int nextPrime(int n) {
+    if (n % 2 == 0) n++;
+
+    for (; !isPrime(n); n += 2)
+      ;
+
+    return n;
+  }
+
+  private static boolean isPrime(int n) {
+    if (n == 2 || n == 3) return true;
+
+    if (n == 1 || n % 2 == 0) return false;
+
+    for (int i = 3; i * i <= n; i += 2) if (n % i == 0) return false;
+
+    return true;
   }
 }
 
+/*
+ * Abstract class for hashing
+ * Includes methods to run tests and print stats
+ */
 abstract class Hasher {
   String title;
   int numInsertions = 0;
@@ -58,7 +83,7 @@ abstract class Hasher {
 
   public abstract int insert(String x);
 
-  public abstract void getName(String x);
+  public abstract void query(String x);
 
   public abstract int getTableSize();
 
@@ -85,14 +110,18 @@ abstract class Hasher {
 
   public void queryNames(String[] names) {
     System.out.println("Querying names");
-    long startTime = System.currentTimeMillis();
+    Instant startTime = Instant.now();
 
     for (String n : names) {
-      getName(n);
+      query(n);
     }
 
-    long endTime = System.currentTimeMillis();
-    System.out.println("Elapsed time: " + (endTime - startTime));
+    Instant endTime = Instant.now();
+    System.out.println(
+        "Elapsed time: "
+            + ((endTime.getEpochSecond() * 1_000_000 + endTime.getNano() / 1_000)
+                - (startTime.getEpochSecond() * 1_000_000 + startTime.getNano() / 1_000))
+            + " microseconds");
   }
 
   public void Insert(String x) {
@@ -109,6 +138,8 @@ abstract class Hasher {
     System.out.println("Inserting complete");
     getAverageCollisions();
     getTotalCollisions();
+    System.out.println("Table Size: " + getTableSize());
+    System.out.println("Slots Occupied: " + getOccupied());
     getEmptySlots();
     getLoadFactor();
     queryNames(toQuery);
@@ -116,6 +147,102 @@ abstract class Hasher {
   }
 }
 
+class DoubleHashTable extends Hasher {
+  private int tableSize;
+  private int occupied;
+  private String[] list;
+
+  public DoubleHashTable(int size) {
+    tableSize = size;
+    list = new String[size];
+    occupied = 0;
+  }
+
+  @Override
+  public int insert(String x) {
+    int hashCode = x.hashCode();
+    int base = primaryHash(hashCode);
+    int step = secondaryHash(hashCode);
+    int collisions = 0;
+
+    int probe = base += step;
+
+    while (list[probe] != null) {
+      probe += step;
+      collisions++;
+      if (probe > tableSize) {
+        probe -= tableSize;
+      }
+    }
+
+    list[probe] = x;
+    occupied++;
+    return collisions;
+  }
+
+  @Override
+  public void query(String x) {
+    int hashCode = x.hashCode();
+    int base = primaryHash(hashCode);
+    int step = secondaryHash(hashCode);
+
+    base += step;
+
+    while (!list[base].equals(x)) {
+      base += step;
+      if (base > tableSize) {
+        base -= tableSize;
+      }
+    }
+  }
+
+  @Override
+  public int getTableSize() {
+    return tableSize;
+  }
+
+  @Override
+  public int getOccupied() {
+    return occupied;
+  }
+
+  private int primaryHash(int hashCode) {
+    return hashCode % tableSize;
+  }
+
+  private int secondaryHash(int hashCode) {
+    return 97 - (hashCode % 97);
+  }
+}
+
+class PerfectHashTable extends Hasher {
+
+  @Override
+  public int insert(String x) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'insert'");
+  }
+
+  @Override
+  public void query(String x) {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'getName'");
+  }
+
+  @Override
+  public int getTableSize() {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'getTableSize'");
+  }
+
+  @Override
+  public int getOccupied() {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'getOccupied'");
+  }
+}
+
+/** Provided by instructor */
 class SeparateChainHashTable extends Hasher {
 
   private static final int DEFAULT_TABLE_SIZE = 101;
@@ -135,14 +262,14 @@ class SeparateChainHashTable extends Hasher {
   }
 
   @Override
-  public void getName(String x) {
+  public void query(String x) {
     int hashed = myhash(x);
     List<String> whichList = theLists[hashed];
     int position = 0;
     for (String s : whichList) {
-      if (x == s) {
+      if (x.equals(s)) {
         System.out.println("Found " + x + " Index: " + hashed + " Position: " + position);
-        break;
+        return;
       }
       position++;
     }
@@ -264,7 +391,7 @@ class QuadraticProbingHashTable extends Hasher {
   }
 
   @Override
-  public void getName(String x) {
+  public void query(String x) {
     int found = findPos(x);
     System.out.println("Found: " + x + " Index: " + found);
   }
