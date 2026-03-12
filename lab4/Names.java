@@ -8,8 +8,9 @@ import java.util.Scanner;
 public class Names {
   public static void main(String[] args) {
     File namesFile = new File("first.txt");
-    int size = nextPrime(19948);
-    String[] names = new String[size];
+    int namesSize = 19948;
+    int size = nextPrime(namesSize / 2 + namesSize);
+    String[] names = new String[namesSize];
     int index = 0;
 
     try (Scanner scan = new Scanner(namesFile)) {
@@ -50,6 +51,10 @@ public class Names {
     SCHT.runTests(names, toQuery);
     Hasher QPHT = new QuadraticProbingHashTable(size);
     QPHT.runTests(names, toQuery);
+    Hasher DHT = new DoubleHashTable(size);
+    DHT.runTests(names, toQuery);
+    Hasher PHT = new PerfectHashTable(size);
+    PHT.runTests(names, toQuery);
   }
 
   public static int nextPrime(int n) {
@@ -156,11 +161,16 @@ class DoubleHashTable extends Hasher {
     tableSize = size;
     list = new String[size];
     occupied = 0;
+    title = "Double Hashing Table";
   }
 
   @Override
   public int insert(String x) {
     int hashCode = x.hashCode();
+    hashCode %= tableSize;
+    if (hashCode < 0) {
+      hashCode += tableSize;
+    }
     int base = primaryHash(hashCode);
     int step = secondaryHash(hashCode);
     int collisions = 0;
@@ -176,7 +186,7 @@ class DoubleHashTable extends Hasher {
       // detect cycle
       if (probe == base) {
         System.out.println("Failed to insert " + x);
-        return -1;
+        return collisions;
       }
     }
 
@@ -188,6 +198,10 @@ class DoubleHashTable extends Hasher {
   @Override
   public void query(String x) {
     int hashCode = x.hashCode();
+    hashCode %= tableSize;
+    if (hashCode < 0) {
+      hashCode += tableSize;
+    }
     int base = primaryHash(hashCode);
     int step = secondaryHash(hashCode);
 
@@ -228,29 +242,137 @@ class DoubleHashTable extends Hasher {
 }
 
 class PerfectHashTable extends Hasher {
+  private int tableSize;
+  private int occupied;
+  private String[] list;
+  private int maxHashes;
+  private int[][] hashes;
+  private int hashCount;
+  private int currentHash;
+  private int prime;
+
+  public PerfectHashTable(int size) {
+    title = "Perfect Hashing Table";
+    tableSize = size;
+    list = new String[size];
+    occupied = 0;
+    maxHashes = 20;
+    hashes = new int[maxHashes][2];
+    hashCount = 0;
+    currentHash = -1;
+    prime = Names.nextPrime(size);
+  }
+
+  private int[] nextHash() {
+    currentHash++;
+    if (hashCount < maxHashes) {
+
+      int a = (int) (Math.random() * tableSize) + 1;
+      int b = (int) (Math.random() * tableSize) + 1;
+
+      boolean exists = false;
+      while (true) {
+        for (int i = 0; i < hashCount; i++) {
+          if (hashes[i][0] == a && hashes[i][1] == b) {
+            exists = true;
+            break;
+          }
+        }
+        if (exists) {
+          a = (int) (Math.random() * tableSize) + 1;
+          b = (int) (Math.random() * tableSize) + 1;
+        }
+        break;
+      }
+
+      hashCount++;
+      hashes[currentHash][0] = a;
+      hashes[currentHash][1] = b;
+      return hashes[currentHash];
+    }
+
+    currentHash %= maxHashes;
+    return hashes[currentHash];
+  }
+
+  private int hash(String x, int a, int b) {
+    int hashed = x.hashCode();
+    hashed %= tableSize;
+    if (hashed < 0) {
+      hashed += tableSize;
+    }
+    return ((a * hashed + b) % prime) % tableSize;
+  }
 
   @Override
   public int insert(String x) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'insert'");
+    int[] hash;
+    if (hashCount == 0) {
+      hash = nextHash();
+    } else {
+      hash = hashes[currentHash];
+    }
+    int a = hash[0];
+    int b = hash[1];
+
+    int hashed = hash(x, a, b);
+    int collisions = 0;
+
+    while (list[hashed] != null) {
+      collisions++;
+
+      // cycle
+      if (collisions == maxHashes) {
+        System.out.println("Failed to insert " + x);
+        return collisions;
+      }
+
+      hash = nextHash();
+      a = hash[0];
+      b = hash[1];
+      hashed = hash(x, a, b);
+    }
+
+    list[hashed] = x;
+    occupied++;
+
+    return collisions;
   }
 
   @Override
   public void query(String x) {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'getName'");
+    int a = hashes[currentHash][0];
+    int b = hashes[currentHash][1];
+
+    int hashed = hash(x, a, b);
+    int tries = 0;
+
+    while (list[hashed] == null || (list[hashed] != null && !list[hashed].equals(x))) {
+      tries++;
+
+      // cycle
+      if (tries == maxHashes) {
+        System.out.println("Failed to find " + x);
+        return;
+      }
+
+      int[] next = nextHash();
+      a = next[0];
+      b = next[1];
+      hashed = hash(x, a, b);
+    }
+
+    System.out.println("Found: " + x + " Index: " + hashed);
   }
 
   @Override
   public int getTableSize() {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'getTableSize'");
+    return tableSize;
   }
 
   @Override
   public int getOccupied() {
-    // TODO Auto-generated method stub
-    throw new UnsupportedOperationException("Unimplemented method 'getOccupied'");
+    return occupied;
   }
 }
 
@@ -410,7 +532,7 @@ class QuadraticProbingHashTable extends Hasher {
 
   @Override
   public int getTableSize() {
-    return theSize;
+    return array.length;
   }
 
   @Override
