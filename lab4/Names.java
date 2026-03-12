@@ -165,13 +165,18 @@ class DoubleHashTable extends Hasher {
     int step = secondaryHash(hashCode);
     int collisions = 0;
 
-    int probe = base += step;
+    base = (base + step) % tableSize;
+
+    int probe = base;
 
     while (list[probe] != null) {
-      probe += step;
+      probe = (probe + step) % tableSize;
       collisions++;
-      if (probe > tableSize) {
-        probe -= tableSize;
+
+      // detect cycle
+      if (probe == base) {
+        System.out.println("Failed to insert " + x);
+        return -1;
       }
     }
 
@@ -186,14 +191,21 @@ class DoubleHashTable extends Hasher {
     int base = primaryHash(hashCode);
     int step = secondaryHash(hashCode);
 
-    base += step;
+    base = (base + step) % tableSize;
 
-    while (!list[base].equals(x)) {
-      base += step;
-      if (base > tableSize) {
-        base -= tableSize;
+    int probe = base;
+
+    while (!list[probe].equals(x)) {
+      probe = (probe + step) % tableSize;
+
+      // detect cycle
+      if (probe == base) {
+        System.out.println("Failed to find " + x);
+        return;
       }
     }
+
+    System.out.println("Found: " + x + " Index: " + probe);
   }
 
   @Override
