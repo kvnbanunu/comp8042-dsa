@@ -95,8 +95,9 @@ abstract class Hasher {
   public abstract int getOccupied();
 
   public void getAverageCollisions() {
-    double avg = (double) (totalCollisions) / (double) (numInsertions);
-    System.out.printf("Average Collisions: %.2f\n", avg);
+    double avg = (double) (totalCollisions) / (double) (numInsertions) * 100;
+    System.out.printf("Average Collisions: %.2f", avg);
+    System.out.println("%");
   }
 
   public void getTotalCollisions() {
@@ -110,7 +111,8 @@ abstract class Hasher {
 
   public void getLoadFactor() {
     double load = (double) (getOccupied()) / (double) (getTableSize()) * 100;
-    System.out.println("Load Factor: " + load + "%");
+    System.out.printf("Load Factor: %.2f", load);
+    System.out.println("%");
   }
 
   public void queryNames(String[] names) {
