@@ -283,8 +283,10 @@ class PerfectHashTable extends Hasher {
         if (exists) {
           a = (int) (Math.random() * tableSize) + 1;
           b = (int) (Math.random() * tableSize) + 1;
+          exists = false;
+        } else {
+          break;
         }
-        break;
       }
 
       hashCount++;
