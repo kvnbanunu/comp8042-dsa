@@ -21,6 +21,7 @@ public class EightPuzzleRunner {
             {4, 0, 2},
             {7, 6, 5}
         });
+        System.out.println(initialState.hashCode());
 
         System.out.println(initialState.hamming());
         System.out.println(initialState.manhattan());
