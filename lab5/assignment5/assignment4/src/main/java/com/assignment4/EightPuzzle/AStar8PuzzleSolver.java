@@ -14,10 +14,11 @@ public class AStar8PuzzleSolver implements EightPuzzleSolver{
     private GameBoardPQEntry current;
     private solvedStatus solved;
 
-    // You need to decide what data structure to use to store the visited nodes, either a 
+    // You need to decide what data structure to use to store the visited nodes, either a
     // Separate chaining hash table or a quadratic probing hash table.
     // private YourChoiceOfHashTable visited;
-    
+    private QuadraticProbingHashTable visited;
+
     public AStar8PuzzleSolver(GameBoard initial, GameBoard goal){
         this.initialBoardState = initial;
         this.goalBoardState = goal;
@@ -25,6 +26,7 @@ public class AStar8PuzzleSolver implements EightPuzzleSolver{
         predecessors = new HashMap<>();
         solved = solvedStatus.NOT_EXECUTED;
         // visited = new YourChoiceOfHashTable<>();
+        visited = new QuadraticProbingHashTable<>();
     }
 
     public void printSolution(){
@@ -51,7 +53,7 @@ public class AStar8PuzzleSolver implements EightPuzzleSolver{
 
     public void solve(){
        /*
-       * Your code here 
+       * Your code here
        * Use the exploreNext method to explore the next node in the frontier until the queue is empty
        */
     }
@@ -89,7 +91,7 @@ public class AStar8PuzzleSolver implements EightPuzzleSolver{
         public int priority;
         public int gScore;
         public int hScore;
-        
+
         public GameBoardPQEntry(GameBoard board, int gScore){
             this.board = board;
             this.gScore = gScore;

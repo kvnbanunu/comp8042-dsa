@@ -26,6 +26,7 @@ public class EightPuzzleRunner {
         System.out.println(initialState.hamming());
         System.out.println(initialState.manhattan());
         System.out.println(initialState.manhattanPlusHamming());
+        System.out.println(initialState.toString());
 
         GameBoard goalState = new GameBoard(new int[][] {
             {1, 2, 3},
@@ -36,6 +37,7 @@ public class EightPuzzleRunner {
         System.out.println(goalState.hamming());
         System.out.println(goalState.manhattan());
         System.out.println(goalState.manhattanPlusHamming());
+        System.out.println(goalState.toString());
 
 //        AStar8PuzzleSolver solver = new AStar8PuzzleSolver(initialState, goalState);
 //        solver.solve();

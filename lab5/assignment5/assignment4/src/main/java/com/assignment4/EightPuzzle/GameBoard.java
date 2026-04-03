@@ -20,9 +20,28 @@ public class GameBoard implements Comparable<GameBoard> {
     }
 
     // for quick comparisons against the goal state
-    private int[][] GOAL;
+    private static final int[][] GOAL = {
+        {1, 2, 3},
+        {4, 5, 6},
+        {7, 8, 0},
+    };
     // Stores the coordinates of each tile in the goal state
-    private Coordinate[] GOAL_COORDINATES;
+    private static final Coordinate[] GOAL_COORDINATES = {
+        new Coordinate(2, 2),
+        new Coordinate(0, 0),
+        new Coordinate(0, 1),
+        new Coordinate(0, 2),
+        new Coordinate(1, 0),
+        new Coordinate(1, 1),
+        new Coordinate(1, 2),
+        new Coordinate(2, 0),
+        new Coordinate(2, 1),
+    };
+
+    // The hashCode of the GOAL state
+    private static final int GOAL_HASH = 123456780;
+
+    private final int hashCode;
 
     private final int[][] tiles;
     private final int dimension;
@@ -42,49 +61,12 @@ public class GameBoard implements Comparable<GameBoard> {
             }
         }
 
-        initGoalState();
+        this.hashCode = hashCode();
 
         if (!isValid()){
             tiles = null;
             throw new IllegalArgumentException("Invalid board! It must include consecutive numbers and be square");
         }
-    }
-
-    // initialize goal board state
-    private void initGoalState() {
-        GOAL = new int[dimension][dimension];
-        GOAL_COORDINATES = new Coordinate[dimension * dimension];
-        int last = dimension - 1;
-        int count = 1;
-
-        // bottom right corner should be the blank tile
-        GOAL[last][last] = 0;
-        GOAL_COORDINATES[0] = new Coordinate(last, last);
-
-        for (int i = 0; i < dimension; i++) {
-            for (int j = 0; j < dimension; j++) {
-                if (!(i == last && j == last)) {
-                    GOAL[i][j] = count;
-                    GOAL_COORDINATES[count] = new Coordinate(i, j);
-                }
-                count++;
-            }
-        }
-    }
-
-    // print GOAL array for testing
-    public void printGoalState() {
-        for (int i = 0; i < dimension; i++) {
-            for (int j = 0; j < dimension; j++) {
-                System.out.print(GOAL[i][j] + " ");
-            }
-            System.out.println();
-        }
-    }
-
-    // print GOAL_COORDINATES array for testing
-    public void printGoalCoordinates() {
-        System.out.println(Arrays.toString(GOAL_COORDINATES));
     }
 
     public boolean isValid(){
@@ -125,6 +107,8 @@ public class GameBoard implements Comparable<GameBoard> {
     public int dimension(){
         return dimension;
     }
+
+    public int getHashCode() { return hashCode; }
 
     /*
      * The Hamming distance between a board and the goal board is the number of tiles in the wrong position.
@@ -177,9 +161,7 @@ public class GameBoard implements Comparable<GameBoard> {
         return total;
     }
 
-    public boolean isGoal(){
-        return equals(GOAL);
-    }
+    public boolean isGoal() { return hashCode == GOAL_HASH; }
 
     @Override
     public int hashCode(){
@@ -205,26 +187,14 @@ public class GameBoard implements Comparable<GameBoard> {
         if (obj == null || getClass() != obj.getClass()) return false;
 
         GameBoard other = (GameBoard) obj;
-        if (dimension != other.dimension) return false;
+        if (dimension != other.dimension()) return false;
 
-        return equals(other.getTiles());
-    }
-
-    public boolean equals(int[][] other) {
-        for (int i = 0; i < dimension; i++) {
-            for (int j = 0; j < dimension; j++) {
-                if (tiles[i][j] != other[i][j]) return false;
-            }
-        }
-        return true;
+        return hashCode == other.getHashCode();
     }
 
     @Override
     public int compareTo(GameBoard other) {
-        int a = hashCode();
-        int b = other.hashCode();
-
-        return Integer.compare(a, b);
+        return Integer.compare(hashCode, other.getHashCode());
     }
 
     // all neighboring board states

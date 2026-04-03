@@ -27,16 +27,16 @@ public class QuickInsertionSortTest {
     public void testQuickInsertionSortLargeArray() {
         QuickInsertionSort<Float> sorter = new QuickInsertionSort<>();
 
-        Random r = new Random(); 
+        Random r = new Random();
         r.setSeed(0);
         Float[] randomInput = new Float[10000];
         for(int i = 0; i < randomInput.length; i++){
             randomInput[i] = r.nextFloat();
-        }        
+        }
         Float[] duplicate = Arrays.copyOf(randomInput, randomInput.length);
         Arrays.sort(duplicate);
         sorter.quickInsertionSort(randomInput);
-        
+
         assertArrayEquals(duplicate, randomInput);
         assertEquals(908, QuickInsertionSort.insertCount);
         assertEquals(907, QuickInsertionSort.pivotCount);
